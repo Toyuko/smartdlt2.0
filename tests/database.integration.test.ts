@@ -1,5 +1,6 @@
 // @vitest-environment node
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { beforeAll, describe, expect, it } from "vitest";
 
@@ -7,7 +8,12 @@ let db: PGlite;
 
 beforeAll(async () => {
   db = new PGlite();
-  await db.exec(readFileSync("supabase/migrations/20261021143000_init.sql", "utf8"));
+  const migrations = readdirSync("supabase/migrations")
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
+  for (const name of migrations) {
+    await db.exec(readFileSync(path.join("supabase/migrations", name), "utf8"));
+  }
   await db.query(
     `insert into offices (id, slug, name, name_th, province, province_th, demo_label)
      values ('11111111-1111-4111-8111-111111111111', 'desk', 'Desk', 'โต๊ะ', 'Test', 'ทดสอบ', 'Demo location')`,
@@ -49,7 +55,7 @@ async function reserve(reference: string, key: string, slot = "33333333-3333-433
       null,
       key,
       reference,
-      "a".repeat(64),
+      key.replaceAll("-", "").padEnd(64, "ab").slice(0, 64),
     ],
   );
 }
@@ -99,12 +105,81 @@ describe("reservation database", () => {
     ).rejects.toThrow(/unauthorized|not_found/);
   });
 
+  it("rejects a renewal date outside the configured demo window and accepts one inside it", async () => {
+    await db.query(`update booking_categories set eligible_office_slugs = eligible_office_slugs || array['desk'] where slug = 'thai-renewal'`);
+    const service = await db.query(`select id from services where slug = 'renewal-car'`);
+    const serviceId = row<{ id: string }>(service).id;
+    await db.query(
+      `insert into time_slots (id, office_id, service_id, starts_at, ends_at, capacity)
+       values ('14141414-1414-4414-8414-141414141414', '11111111-1111-4111-8111-111111111111', $1, now() + interval '3 days', now() + interval '3 days 1 hour', 2)`,
+      [serviceId],
+    );
+    const soon = await db.query(`select to_char((timezone('Asia/Bangkok', now()))::date + 10, 'YYYY-MM-DD') as expiry`);
+    const later = await db.query(`select to_char((timezone('Asia/Bangkok', now()))::date + 200, 'YYYY-MM-DD') as expiry`);
+    const soonDate = row<{ expiry: string }>(soon).expiry;
+    const laterDate = row<{ expiry: string }>(later).expiry;
+    await expect(
+      db.query(`select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb)`, [
+        "11111111-1111-4111-8111-111111111111",
+        serviceId,
+        "14141414-1414-4414-8414-141414141414",
+        null,
+        "Renewal Visitor",
+        null,
+        null,
+        null,
+        "15151515-1515-4515-8515-151515151515",
+        "VD-TEST-RENO",
+        "c".repeat(64),
+        "thai",
+        JSON.stringify({ currentLicenceType: "temporary", expiryDate: laterDate }),
+      ]),
+    ).rejects.toThrow(/renewal_window/);
+    const reserved = await db.query(`select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb) as result`, [
+      "11111111-1111-4111-8111-111111111111",
+      serviceId,
+      "14141414-1414-4414-8414-141414141414",
+      null,
+      "Renewal Visitor",
+      null,
+      null,
+      null,
+      "16161616-1616-4616-8616-161616161616",
+      "VD-TEST-RENW",
+      "d".repeat(64),
+      "thai",
+      JSON.stringify({ currentLicenceType: "temporary", expiryDate: soonDate }),
+    ]);
+    expect(row<{ result: { idempotent: boolean } }>(reserved).result.idempotent).toBe(false);
+  });
+
+  it("lets only one of two overlapping reservations take the last seat", async () => {
+    await db.query(
+      `insert into time_slots (id, office_id, service_id, starts_at, ends_at, capacity)
+       values ('17171717-1717-4717-8717-171717171717', '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', now() + interval '4 days', now() + interval '4 days 1 hour', 1)`,
+    );
+    const attempts = await Promise.allSettled([
+      reserve("VD-TEST-RACE", "18181818-1818-4818-8818-181818181818", "17171717-1717-4717-8717-171717171717"),
+      reserve("VD-TEST-RAC2", "19191919-1919-4919-8919-191919191919", "17171717-1717-4717-8717-171717171717"),
+    ]);
+    const fulfilled = attempts.filter((attempt) => attempt.status === "fulfilled");
+    const rejected = attempts.filter((attempt) => attempt.status === "rejected");
+    const detail = attempts
+      .map((attempt) => (attempt.status === "rejected" ? String(attempt.reason) : "reserved"))
+      .join(" || ");
+    expect(fulfilled, detail).toHaveLength(1);
+    expect(rejected, detail).toHaveLength(1);
+    expect(String((rejected[0] as PromiseRejectedResult).reason)).toMatch(/slot_full/);
+  });
+
   it("hides bookings and inactive offices from the public role", async () => {
     await db.exec("set role anon");
     try {
       await expect(db.query("select * from bookings")).rejects.toThrow(/permission denied/i);
       const offices = await db.query("select slug from offices order by slug");
       expect((offices.rows as { slug: string }[]).map((entry) => entry.slug)).toEqual(["desk"]);
+      const categories = await db.query("select slug from booking_categories where slug = 'new-thai-licence'");
+      expect(categories.rows).toHaveLength(1);
       await expect(
         db.query(`select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, [
           "11111111-1111-4111-8111-111111111111",

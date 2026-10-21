@@ -45,6 +45,8 @@ const DB_STATUS: Record<string, number> = {
   already_checked_in: 409,
   invalid_transition: 409,
   vehicle_required: 400,
+  renewal_window: 409,
+  validation: 400,
   unauthorized: 403,
   not_found: 404,
 };

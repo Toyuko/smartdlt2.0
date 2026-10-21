@@ -2,10 +2,14 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { DocumentGuidance } from "@/components/booking/document-guidance";
 import { QrCard } from "@/components/booking/qr-card";
 import { errorText, SetupRequired, useI18n } from "@/components/language";
 import { Button, Panel } from "@/components/ui";
+import { answerLabel, categoryBySlug, inferLicenceClass, selectDocumentSet } from "@/lib/booking/categories";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
+import { vehicleCategorySeed } from "@/lib/demo-catalog";
 import { formatLongDate, formatTime } from "@/lib/time";
 import type { PublicBooking } from "@/lib/booking/public-view";
 
@@ -44,27 +48,57 @@ export function BookingConfirmation() {
 
   const office = locale === "th" ? booking.officeNameTh : booking.officeName;
   const service = locale === "th" ? booking.serviceNameTh : booking.serviceName;
+  const categoryName = locale === "th" ? booking.categoryLabelTh : booking.categoryLabel;
+  const category = categoryBySlug(booking.category);
+  const guidance = category
+    ? selectDocumentSet(category, {
+        applicantCategory: booking.applicantCategory ?? "",
+        serviceSlug: booking.serviceSlug,
+        licenceClass: inferLicenceClass(booking.serviceSlug, booking.answers, booking.vehicleCategory ?? ""),
+        licenceType: booking.answers.currentLicenceType ?? "",
+      })
+    : undefined;
+  const vehicle = vehicleCategorySeed.find((item) => item.slug === booking.vehicleCategory);
+  const applicant =
+    booking.applicantCategory === "foreign" ? t.book.applicantForeign : booking.applicantCategory === "thai" ? t.book.applicantThai : "—";
 
   return (
     <Panel className="print-card mx-auto max-w-3xl">
-      <p className="text-sm font-bold text-brand-dark">{DEMO_NOTICE}</p>
+      <p className="text-sm font-bold text-brand-dark" data-testid="print-disclaimer">
+        {DEMO_NOTICE}
+      </p>
       <h1 className="mt-3 text-3xl font-bold">{t.confirm.title}</h1>
       <p className="mt-2 text-muted">{t.confirm.saved}</p>
       <dl className="mt-6 grid gap-4 sm:grid-cols-2">
         <Item label={t.staff.reference} value={booking.reference} />
         <Item label={t.book.name} value={booking.applicantDisplayName} />
+        <Item label={t.confirm.applicantCategory} value={applicant} />
         <Item label={t.staff.date} value={`${formatLongDate(booking.startsAt, locale)} · ${formatTime(booking.startsAt)}–${formatTime(booking.endsAt)}`} />
         <Item label={t.staff.status} value={statusLabel(booking.status, t)} />
         <Item label={t.staff.office} value={`${office} — ${booking.demoLabel}`} />
+        <Item label={t.confirm.category} value={categoryName} />
         <Item label={t.staff.service} value={service} />
+        {vehicle ? <Item label={t.confirm.vehicle} value={locale === "th" ? vehicle.name_th : vehicle.name} /> : null}
+        {Object.entries(booking.answers).map(([key, value]) => {
+          const labelled = answerLabel(category, key, value, locale);
+          return <Item key={key} label={labelled.label} value={labelled.value} />;
+        })}
       </dl>
+      {guidance ? (
+        <div className="mt-6">
+          <DocumentGuidance set={guidance} />
+        </div>
+      ) : null}
       <div className="mt-8">
         {verificationUrl ? <QrCard verificationUrl={verificationUrl} reference={booking.reference} /> : <p className="text-sm leading-6 text-muted">{t.confirm.qrOnce}</p>}
       </div>
-      <div className="no-print mt-6">
+      <div className="no-print mt-6 flex flex-wrap gap-3">
         <Button type="button" variant="secondary" onClick={() => window.print()}>
           {t.actions.print}
         </Button>
+        <Link href="/lookup" className="inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-white px-5 py-2 text-sm font-semibold">
+          {t.confirm.findAgain}
+        </Link>
       </div>
     </Panel>
   );

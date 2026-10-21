@@ -22,7 +22,12 @@ const booking: PublicBooking = {
   demoLabel: "Demo location — not an official DLT office",
   serviceName: "Renewal demonstration — car",
   serviceNameTh: "สาธิตการต่ออายุ",
-  category: "renewal",
+  serviceSlug: "renewal-car",
+  category: "thai-renewal",
+  categoryLabel: "Thai Driving Licence Renewal",
+  categoryLabelTh: "ต่ออายุใบอนุญาตขับขี่ไทย",
+  applicantCategory: "thai",
+  answers: {},
   startsAt: "2026-10-29T01:00:00.000Z",
   endsAt: "2026-10-29T02:00:00.000Z",
 };
@@ -38,11 +43,22 @@ const request = {
   timeSlotId: "33333333-3333-4333-8333-333333333333",
   acceptDisclaimer: true,
   idempotencyKey: "44444444-4444-4444-8444-444444444444",
+  applicantCategory: "thai",
+  categorySlug: "",
+  answers: {},
 };
 
 function writer(overrides: Partial<BookingWriter> = {}): BookingWriter {
   return {
     consumeRateLimit: async () => true,
+    loadContext: async () => ({
+      officeSlug: "riverside",
+      officeActive: true,
+      serviceSlug: "renewal-car",
+      serviceActive: true,
+      requiresVehicle: true,
+      category: null,
+    }),
     reserve: async () => ({ idempotent: false, id: booking.id, reference: booking.reference, status: "confirmed" }),
     getPublicById: async () => booking,
     ...overrides,

@@ -26,10 +26,19 @@ export const bookingRequestSchema = z
     timeSlotId: uuid,
     acceptDisclaimer: z.boolean(),
     idempotencyKey: uuid,
+    applicantCategory: z.string().trim().max(40),
+    categorySlug: z.string().trim().max(80),
+    answers: z.record(z.string().max(40), z.string().trim().max(200)),
   })
   .superRefine((value, ctx) => {
+    if (value.applicantCategory !== "thai" && value.applicantCategory !== "foreign") {
+      ctx.addIssue({ code: "custom", message: "applicant_required", path: ["applicantCategory"] });
+    }
     if (!value.acceptDisclaimer) {
       ctx.addIssue({ code: "custom", message: "disclaimer_required", path: ["acceptDisclaimer"] });
+    }
+    for (const [key, answer] of Object.entries(value.answers)) {
+      rejectGovernmentNumbers(answer, ctx, key);
     }
     if (value.contactEmail && !emailPattern.test(value.contactEmail)) {
       ctx.addIssue({ code: "custom", message: "email_invalid", path: ["contactEmail"] });

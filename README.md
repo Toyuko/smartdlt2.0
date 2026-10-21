@@ -15,12 +15,12 @@ The notice below is shown throughout the interface:
 - `qrcode` for images and `html5-qrcode` for the staff camera, with manual reference entry
 - Vitest, React Testing Library, and Playwright
 
-The schema contract is `supabase/migrations/20261021143000_init.sql`. See `ARCHITECTURE.md` for the request path and status rules.
+Apply every file in `supabase/migrations/` in order, starting with `20261021143000_init.sql`. See `ARCHITECTURE.md` for the request path and status rules.
 
 ## Local setup
 
 1. Create a Supabase project.
-2. In the SQL editor, run `supabase/migrations/20261021143000_init.sql`.
+2. In the SQL editor, run the files in `supabase/migrations/` in filename order.
    With the Supabase CLI, from this directory: `supabase db push` after linking the project.
 3. Copy `.env.example` to `.env.local` and fill in the URL, anon key, and service-role key.
 4. Install and seed:

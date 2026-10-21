@@ -1,6 +1,8 @@
 import "server-only";
+import { categoryBySlug, categoryFromRow, stringRecord } from "@/lib/booking/categories";
+import type { BookingCategory } from "@/lib/booking/categories";
 import { decideVerificationOutcome, type BookingStatus, type VerificationOutcome } from "@/lib/booking/outcomes";
-import type { BookingWriter, ReserveInput, ReserveResult } from "@/lib/booking/create-booking";
+import type { BookingContext, BookingWriter, ReserveInput, ReserveResult } from "@/lib/booking/create-booking";
 import type { PublicBooking } from "@/lib/booking/public-view";
 import { hashToken } from "@/lib/booking/tokens";
 import { HttpError, httpErrorFromDb, readDbCode } from "@/lib/http";
@@ -38,6 +40,8 @@ export type CatalogService = {
 
 export type CatalogVehicle = { slug: string; name: string; nameTh: string };
 
+export type CatalogCategory = BookingCategory;
+
 export type StaffBooking = PublicBooking & {
   contactEmail: string | null;
   contactPhone: string | null;
@@ -59,18 +63,18 @@ export type AuditEntry = {
 };
 
 const PUBLIC_COLUMNS = `
-  id, reference, status, applicant_display_name, vehicle_category,
+  id, reference, status, applicant_display_name, vehicle_category, applicant_category, answers,
   offices!bookings_office_id_fkey ( name, name_th, province, province_th, demo_label ),
-  services!bookings_service_id_fkey ( name, name_th, category ),
+  services!bookings_service_id_fkey ( name, name_th, category, category_th, slug ),
   time_slots!bookings_time_slot_id_fkey ( starts_at, ends_at )
 `;
 
 const STAFF_COLUMNS = `
-  id, reference, status, applicant_display_name, vehicle_category,
+  id, reference, status, applicant_display_name, vehicle_category, applicant_category, answers,
   contact_email, contact_phone, notes, created_at, checked_in_at, completed_at, cancelled_at,
   office_id, service_id, time_slot_id,
   offices!bookings_office_id_fkey ( name, name_th, province, province_th, demo_label ),
-  services!bookings_service_id_fkey ( name, name_th, category ),
+  services!bookings_service_id_fkey ( name, name_th, category, category_th, slug ),
   time_slots!bookings_time_slot_id_fkey ( starts_at, ends_at, capacity )
 `;
 
@@ -120,7 +124,12 @@ function mapPublic(row: Record<string, unknown>): PublicBooking {
     demoLabel: office.demo_label,
     serviceName: service.name,
     serviceNameTh: service.name_th,
+    serviceSlug: String(service.slug ?? ""),
     category: service.category,
+    categoryLabel: categoryBySlug(service.category)?.name ?? service.category,
+    categoryLabelTh: categoryBySlug(service.category)?.nameTh ?? String(service.category_th ?? service.category),
+    applicantCategory: row.applicant_category ? String(row.applicant_category) : null,
+    answers: stringRecord(row.answers),
     startsAt: slot.starts_at,
     endsAt: slot.ends_at,
   };
@@ -148,7 +157,7 @@ function mapStaff(row: Record<string, unknown>): StaffBooking {
 
 export async function getCatalog() {
   const anon = createAnonClient();
-  const [offices, services, vehicles] = await Promise.all([
+  const [offices, services, vehicles, categories] = await Promise.all([
     anon.from("offices").select("id, slug, name, name_th, province, province_th, demo_label").eq("active", true).order("name"),
     anon
       .from("services")
@@ -156,10 +165,12 @@ export async function getCatalog() {
       .eq("active", true)
       .order("sort_order"),
     anon.from("vehicle_categories").select("slug, name, name_th, sort_order").eq("active", true).order("sort_order"),
+    anon.from("booking_categories").select("*").eq("active", true).order("sort_order"),
   ]);
   if (offices.error) fail(offices.error, "catalog_unavailable");
   if (services.error) fail(services.error, "catalog_unavailable");
   if (vehicles.error) fail(vehicles.error, "catalog_unavailable");
+  if (categories.error) fail(categories.error, "catalog_unavailable");
   return {
     offices: (offices.data ?? []).map((office) => ({
       id: office.id,
@@ -185,6 +196,10 @@ export async function getCatalog() {
       name: vehicle.name,
       nameTh: vehicle.name_th,
     })) satisfies CatalogVehicle[],
+    categories: (categories.data ?? []).flatMap((row) => {
+      const category = categoryFromRow(row as Record<string, unknown>);
+      return category ? [category] : [];
+    }) satisfies CatalogCategory[],
   };
 }
 
@@ -214,6 +229,24 @@ export function createSupabaseBookingWriter(): BookingWriter {
       if (error) fail(error, "rate_limit_unavailable");
       return Boolean(data);
     },
+    async loadContext(officeId, serviceId): Promise<BookingContext | null> {
+      const admin = createAdminClient();
+      const office = await admin.from("offices").select("slug, active").eq("id", officeId).maybeSingle();
+      const service = await admin.from("services").select("slug, active, requires_vehicle, category").eq("id", serviceId).maybeSingle();
+      if (office.error) fail(office.error, "slot_unavailable");
+      if (service.error) fail(service.error, "slot_unavailable");
+      if (!office.data || !service.data) return null;
+      const category = await admin.from("booking_categories").select("*").eq("slug", service.data.category).maybeSingle();
+      if (category.error) fail(category.error, "slot_unavailable");
+      return {
+        officeSlug: office.data.slug,
+        officeActive: office.data.active,
+        serviceSlug: service.data.slug,
+        serviceActive: service.data.active,
+        requiresVehicle: service.data.requires_vehicle,
+        category: category.data ? categoryFromRow(category.data as Record<string, unknown>) : null,
+      };
+    },
     async reserve(input: ReserveInput): Promise<ReserveResult> {
       const admin = createAdminClient();
       const { data, error } = await admin.rpc("reserve_demo_booking", {
@@ -228,6 +261,8 @@ export function createSupabaseBookingWriter(): BookingWriter {
         p_idempotency_key: input.idempotencyKey,
         p_reference: input.reference,
         p_token_hash: input.tokenHash,
+        p_applicant_category: input.applicantCategory,
+        p_answers: input.answers,
       });
       if (error) fail(error, "reserve_failed");
       const result = data as ReserveResult;

@@ -1,8 +1,10 @@
 import { buildVerificationUrl } from "@/lib/booking/codes";
+import { validateSelection, type BookingCategory } from "@/lib/booking/categories";
 import { toPublicBooking, type PublicBooking } from "@/lib/booking/public-view";
 import { generateReference, generateToken, hashToken } from "@/lib/booking/tokens";
 import { bookingRequestSchema, fieldErrorsFromZod } from "@/lib/booking/validation";
 import { HttpError } from "@/lib/http";
+import { bangkokDateParts } from "@/lib/time";
 
 export type ReserveInput = {
   officeId: string;
@@ -16,6 +18,17 @@ export type ReserveInput = {
   idempotencyKey: string;
   reference: string;
   tokenHash: string;
+  applicantCategory: string | null;
+  answers: Record<string, string>;
+};
+
+export type BookingContext = {
+  officeSlug: string;
+  officeActive: boolean;
+  serviceSlug: string;
+  serviceActive: boolean;
+  requiresVehicle: boolean;
+  category: BookingCategory | null;
 };
 
 export type ReserveResult = {
@@ -27,6 +40,7 @@ export type ReserveResult = {
 
 export interface BookingWriter {
   consumeRateLimit(bucket: string, keyHash: string, limit: number, windowSeconds: number): Promise<boolean>;
+  loadContext(officeId: string, serviceId: string): Promise<BookingContext | null>;
   reserve(input: ReserveInput): Promise<ReserveResult>;
   getPublicById(id: string): Promise<PublicBooking | null>;
 }
@@ -47,6 +61,20 @@ export async function createDemoBooking(
   }
 
   const data = parsed.data;
+  const context = await writer.loadContext(data.officeId, data.serviceId);
+  if (!context) throw new HttpError(409, "slot_unavailable");
+  const decision = validateSelection({
+    ...context,
+    applicantCategory: data.applicantCategory,
+    categorySlug: data.categorySlug,
+    vehicleCategory: data.vehicleCategory,
+    answers: data.answers,
+    today: bangkokDateParts().isoDate,
+  });
+  if (!decision.ok) {
+    throw new HttpError(400, "validation", "Check the highlighted fields.", decision.fieldErrors);
+  }
+
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const token = generateToken();
@@ -64,6 +92,8 @@ export async function createDemoBooking(
         idempotencyKey: data.idempotencyKey,
         reference,
         tokenHash: hashToken(token),
+        applicantCategory: data.applicantCategory,
+        answers: decision.answers,
       });
       const booking = await writer.getPublicById(reserved.id);
       if (!booking) throw new HttpError(500, "server_error");

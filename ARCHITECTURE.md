@@ -2,7 +2,7 @@
 
 SmartDLT2.0 is an independently hosted demonstration of a multistep appointment desk. It is not the Department of Land Transport Smart Queue, and it must not be described as issuing or validating official appointments.
 
-The database migration in `supabase/migrations/20261021143000_init.sql` is the only schema contract. Application code maps to that schema. Do not add a second booking model or an in-memory fallback that pretends to persist appointments.
+The schema contract is the ordered SQL in `supabase/migrations/`. `20261021143000_init.sql` creates the booking tables. `20261021223000_booking_categories.sql` adds configurable categories, applicant category, and answer storage without replacing existing bookings. Do not add a second booking model or an in-memory fallback that pretends to persist appointments.
 
 ## Milestones
 

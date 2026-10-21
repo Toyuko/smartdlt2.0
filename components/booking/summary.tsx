@@ -12,7 +12,7 @@ export function BookingSummary({ booking, outcome }: { booking: PublicBooking | 
     <div className="rounded-2xl bg-paper p-4" role="status">
       <p className="text-lg font-bold text-brand-dark">{t.verify[outcome]}</p>
       <p className="mt-2 text-sm leading-6">{t.verify.means}</p>
-      <p className="mt-3 text-xs font-semibold">{DEMO_NOTICE}</p>
+      <p className="mt-3 text-xs font-semibold" data-testid="verify-disclaimer">{DEMO_NOTICE}</p>
       {booking ? (
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <div>
@@ -25,7 +25,14 @@ export function BookingSummary({ booking, outcome }: { booking: PublicBooking | 
           </div>
           <div>
             <dt className="text-muted">{t.staff.office}</dt>
-            <dd className="font-semibold">{locale === "th" ? booking.officeNameTh : booking.officeName}</dd>
+            <dd className="font-semibold">
+              {locale === "th" ? booking.officeNameTh : booking.officeName}
+              <span className="block text-xs text-muted">{booking.demoLabel}</span>
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted">{t.staff.category}</dt>
+            <dd className="font-semibold">{locale === "th" ? booking.categoryLabelTh : booking.categoryLabel}</dd>
           </div>
           <div>
             <dt className="text-muted">{t.staff.service}</dt>

@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { bookingCategorySeed, categoryToRow } from "../lib/booking/categories";
 import { officeSeed, SAMPLE_REFERENCES, serviceSeed, SLOT_CAPACITY, SLOT_PERIODS, vehicleCategorySeed } from "../lib/demo-catalog";
 import { generateToken, hashToken } from "../lib/booking/token-core";
 import { bangkokDateParts, shiftIsoDate, weekdayBangkok } from "../lib/time";
@@ -22,10 +23,11 @@ export async function seedDemo(options: SeedOptions) {
   });
 
   const vehicles = await supabase.from("vehicle_categories").upsert(vehicleCategorySeed, { onConflict: "slug" }).select("slug");
+  const categories = await supabase.from("booking_categories").upsert(bookingCategorySeed.map(categoryToRow), { onConflict: "slug" });
   const offices = await supabase.from("offices").upsert(officeSeed, { onConflict: "slug" }).select("id, slug");
   const services = await supabase.from("services").upsert(serviceSeed, { onConflict: "slug" }).select("id, slug");
-  if (vehicles.error || offices.error || services.error) {
-    throw new Error(vehicles.error?.message || offices.error?.message || services.error?.message);
+  if (vehicles.error || categories.error || offices.error || services.error) {
+    throw new Error(vehicles.error?.message || categories.error?.message || offices.error?.message || services.error?.message);
   }
 
   if (options.replace) {
@@ -45,7 +47,8 @@ export async function seedDemo(options: SeedOptions) {
   }
 
   const officeRows = offices.data ?? [];
-  const serviceRows = services.data ?? [];
+  const activeSlugs = new Set(serviceSeed.filter((item) => item.active !== false).map((item) => item.slug));
+  const serviceRows = (services.data ?? []).filter((service) => activeSlugs.has(service.slug));
   const dates = upcomingDates(14);
   const now = Date.now();
   const slotRows = [];

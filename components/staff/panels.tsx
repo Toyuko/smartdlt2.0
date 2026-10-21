@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BookingSummary } from "@/components/booking/summary";
 import { errorText, useI18n } from "@/components/language";
+import { answerLabel, categoryBySlug } from "@/lib/booking/categories";
+import { DEMO_NOTICE } from "@/lib/demo-notice";
 import { Button, Field, Panel, inputClass } from "@/components/ui";
 import { parseScanPayload } from "@/lib/booking/codes";
 import type { VerificationOutcome } from "@/lib/booking/outcomes";
@@ -149,6 +151,7 @@ export function DashboardPanel() {
 
   return (
     <div className="space-y-4">
+      <p className="text-xs font-semibold text-brand-dark">{DEMO_NOTICE}</p>
       <h1 className="text-3xl font-bold">{t.staff.dashboard}</h1>
       {error ? <p role="alert">{errorText(t.errors, error)}</p> : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -253,7 +256,7 @@ export function BookingList() {
           <Link key={row.id} href={`/staff/bookings/${row.id}`} className="rounded-3xl bg-white p-4 ring-1 ring-line">
             <span className="font-bold">{row.reference}</span>
             <span className="mt-1 block text-sm text-muted">
-              {row.applicantDisplayName} · {locale === "th" ? row.officeNameTh : row.officeName} · {formatLongDate(row.startsAt, locale)} {formatTime(row.startsAt)} · {row.status}
+              {row.applicantDisplayName} · {locale === "th" ? row.categoryLabelTh : row.categoryLabel} · {locale === "th" ? row.serviceNameTh : row.serviceName} · {locale === "th" ? row.officeNameTh : row.officeName} · {formatLongDate(row.startsAt, locale)} {formatTime(row.startsAt)} · {row.status}
             </span>
           </Link>
         ))}
@@ -308,14 +311,21 @@ export function BookingDetail({ id }: { id: string }) {
 
   return (
     <Panel>
-      <h1 className="text-3xl font-bold">{booking.reference}</h1>
+      <p className="text-xs font-semibold text-brand-dark">{DEMO_NOTICE}</p>
+      <h1 className="mt-2 text-3xl font-bold">{booking.reference}</h1>
       <p className="mt-2 text-sm text-muted">{booking.demoLabel}</p>
       <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
         <Info label={t.book.name} value={booking.applicantDisplayName} />
+        <Info label={t.staff.applicantCategory} value={booking.applicantCategory ?? "—"} />
         <Info label={t.staff.status} value={booking.status} />
         <Info label={t.staff.office} value={locale === "th" ? booking.officeNameTh : booking.officeName} />
+        <Info label={t.staff.category} value={locale === "th" ? booking.categoryLabelTh : booking.categoryLabel} />
         <Info label={t.staff.service} value={locale === "th" ? booking.serviceNameTh : booking.serviceName} />
         <Info label={t.staff.date} value={`${formatLongDate(booking.startsAt, locale)} ${formatTime(booking.startsAt)}–${formatTime(booking.endsAt)}`} />
+        {Object.entries(booking.answers).map(([key, value]) => {
+          const labelled = answerLabel(categoryBySlug(booking.category), key, value, locale);
+          return <Info key={key} label={labelled.label} value={labelled.value} />;
+        })}
         <Info label={t.book.email} value={booking.contactEmail ?? "—"} />
         <Info label={t.book.phone} value={booking.contactPhone ?? "—"} />
         <Info label={t.book.notes} value={booking.notes ?? "—"} />

@@ -13,7 +13,12 @@ export type PublicBooking = {
   demoLabel: string;
   serviceName: string;
   serviceNameTh: string;
+  serviceSlug: string;
   category: string;
+  categoryLabel: string;
+  categoryLabelTh: string;
+  applicantCategory: string | null;
+  answers: Record<string, string>;
   startsAt: string;
   endsAt: string;
 };
@@ -32,7 +37,12 @@ export function toPublicBooking(booking: PublicBooking): PublicBooking {
     demoLabel: booking.demoLabel,
     serviceName: booking.serviceName,
     serviceNameTh: booking.serviceNameTh,
+    serviceSlug: booking.serviceSlug,
     category: booking.category,
+    categoryLabel: booking.categoryLabel,
+    categoryLabelTh: booking.categoryLabelTh,
+    applicantCategory: booking.applicantCategory,
+    answers: booking.answers,
     startsAt: booking.startsAt,
     endsAt: booking.endsAt,
   };
