@@ -6,7 +6,7 @@ export async function GET() {
   await connection();
   const configured = isDatabaseConfigured();
   return json(
-    { ok: configured, service: "violet-desk-demo", database: configured ? "configured" : "missing" },
+    { ok: configured, service: "smartdlt2.0", database: configured ? "configured" : "missing" },
     configured ? 200 : 503,
   );
 }

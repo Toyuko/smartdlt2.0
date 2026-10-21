@@ -1,4 +1,4 @@
--- Violet Desk demonstration schema.
+-- SmartDLT2.0 demonstration schema.
 -- Appointments stored here are not official Department of Land Transport records.
 -- gen_random_uuid() is provided by Postgres core. No extra extension is required.
 

@@ -1,6 +1,6 @@
-# Violet Desk — architecture and implementation plan
+# SmartDLT2.0 — architecture and implementation plan
 
-Violet Desk is an independently hosted demonstration of a multistep appointment desk. It is not the Department of Land Transport Smart Queue, and it must not be described as issuing or validating official appointments.
+SmartDLT2.0 is an independently hosted demonstration of a multistep appointment desk. It is not the Department of Land Transport Smart Queue, and it must not be described as issuing or validating official appointments.
 
 The database migration in `supabase/migrations/20261021143000_init.sql` is the only schema contract. Application code maps to that schema. Do not add a second booking model or an in-memory fallback that pretends to persist appointments.
 

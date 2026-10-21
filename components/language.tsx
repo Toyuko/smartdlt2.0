@@ -89,7 +89,7 @@ function SiteHeader() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="flex items-center gap-3">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-brand text-lg font-bold text-white" aria-hidden>
-            V
+            S
           </span>
           <span>
             <span className="block text-base font-bold leading-5">{t.brand}</span>

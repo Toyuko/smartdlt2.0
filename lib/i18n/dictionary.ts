@@ -1,5 +1,5 @@
 export const en = {
-  brand: "Violet Desk",
+  brand: "SmartDLT2.0",
   tagline: "Demonstration appointment desk",
   nav: {
     home: "Home",
@@ -30,7 +30,7 @@ export const en = {
     "ระบบสาธิต — ไม่ใช่บริการของกรมการขนส่งทางบกอย่างเป็นทางการ การนัดหมายและคิวอาร์โค้ดใช้เพื่อการสาธิตและทดสอบเท่านั้น",
   home: {
     title: "Practice an appointment desk without using a government system",
-    lede: "Violet Desk is a fictional booking desk for training and testing. A booking here is not registered with the Department of Land Transport.",
+    lede: "SmartDLT2.0 is a fictional booking desk for training and testing. A booking here is not registered with the Department of Land Transport.",
     card1Title: "Choose a demo desk",
     card1Body: "Offices, services, and times are sample data labelled as demonstration locations.",
     card2Title: "Hold a seat",
@@ -95,7 +95,7 @@ export const en = {
   about: {
     title: "About this demonstration",
     scopeTitle: "Scope",
-    scope: "Violet Desk shows an improved appointment flow: office, service, applicant display name, sample document notes, a calendar, and a confirmation QR. It is hosted separately from government systems.",
+    scope: "SmartDLT2.0 shows an improved appointment flow: office, service, applicant display name, sample document notes, a calendar, and a confirmation QR. It is hosted separately from government systems.",
     limitsTitle: "Limitations",
     limits: "It does not issue licences, take official payments, connect to the Department of Land Transport, or use ThaID. A valid result only means the row exists in this demo database.",
     privacyTitle: "Privacy",
@@ -113,7 +113,7 @@ export const en = {
   },
   verify: {
     title: "Demo verification",
-    means: "A valid demo booking means only that this record exists in the Violet Desk database. It does not mean a government office approved or received it.",
+    means: "A valid demo booking means only that this record exists in the SmartDLT2.0 database. It does not mean a government office approved or received it.",
     valid: "Valid demo booking",
     already_checked_in: "Already checked in",
     cancelled: "Cancelled",
@@ -203,7 +203,7 @@ export const en = {
 export type Dictionary = typeof en;
 
 export const th: Dictionary = {
-  brand: "ไวโอเล็ตเดสก์",
+  brand: "SmartDLT2.0",
   tagline: "โต๊ะนัดหมายสำหรับสาธิต",
   nav: {
     home: "หน้าแรก",
@@ -233,7 +233,7 @@ export const th: Dictionary = {
   bannerThai: en.bannerThai,
   home: {
     title: "ฝึกใช้โต๊ะนัดหมายโดยไม่เข้าสู่ระบบของหน่วยงานราชการ",
-    lede: "ไวโอเล็ตเดสก์เป็นโต๊ะจองสมมติสำหรับฝึกและทดสอบ การจองที่นี่ไม่ได้ลงทะเบียนกับกรมการขนส่งทางบก",
+    lede: "SmartDLT2.0 เป็นโต๊ะจองสมมติสำหรับฝึกและทดสอบ การจองที่นี่ไม่ได้ลงทะเบียนกับกรมการขนส่งทางบก",
     card1Title: "เลือกโต๊ะสาธิต",
     card1Body: "สำนักงาน บริการ และเวลาเป็นข้อมูลตัวอย่าง และติดป้ายว่าเป็นสถานที่สาธิต",
     card2Title: "กันที่นั่ง",
@@ -298,7 +298,7 @@ export const th: Dictionary = {
   about: {
     title: "เกี่ยวกับระบบสาธิตนี้",
     scopeTitle: "ขอบเขต",
-    scope: "ไวโอเล็ตเดสก์แสดงขั้นตอนนัดหมาย ได้แก่ สำนักงาน บริการ ชื่อที่แสดง บันทึกเอกสารตัวอย่าง ปฏิทิน และคิวอาร์ยืนยัน ระบบนี้แยกจากระบบของหน่วยงานราชการ",
+    scope: "SmartDLT2.0 แสดงขั้นตอนนัดหมาย ได้แก่ สำนักงาน บริการ ชื่อที่แสดง บันทึกเอกสารตัวอย่าง ปฏิทิน และคิวอาร์ยืนยัน ระบบนี้แยกจากระบบของหน่วยงานราชการ",
     limitsTitle: "ข้อจำกัด",
     limits: "ระบบนี้ออกใบอนุญาตไม่ได้ รับชำระเงินทางราชการไม่ได้ ไม่เชื่อมกับกรมการขนส่งทางบก และไม่ใช้ ThaID ผลว่าถูกต้องหมายถึงมีแถวข้อมูลในฐานข้อมูลสาธิตนี้เท่านั้น",
     privacyTitle: "ความเป็นส่วนตัว",
@@ -316,7 +316,7 @@ export const th: Dictionary = {
   },
   verify: {
     title: "ผลการตรวจสอบสาธิต",
-    means: "การจองสาธิตที่ถูกต้องหมายถึงมีข้อมูลนี้ในฐานข้อมูลของไวโอเล็ตเดสก์เท่านั้น ไม่ได้หมายความว่าหน่วยงานราชการอนุมัติหรือรับเรื่องแล้ว",
+    means: "การจองสาธิตที่ถูกต้องหมายถึงมีข้อมูลนี้ในฐานข้อมูลของ SmartDLT2.0 เท่านั้น ไม่ได้หมายความว่าหน่วยงานราชการอนุมัติหรือรับเรื่องแล้ว",
     valid: "การจองสาธิตที่ถูกต้อง",
     already_checked_in: "เช็กอินแล้ว",
     cancelled: "ยกเลิกแล้ว",

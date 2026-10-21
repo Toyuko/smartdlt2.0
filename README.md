@@ -1,6 +1,6 @@
-# Violet Desk Demo
+# SmartDLT2.0
 
-Violet Desk is a demonstration appointment desk inspired by the flow of a transport-office queue. It is **not** an official Department of Land Transport service. Bookings, QR codes, and verification results exist only in this application's database.
+SmartDLT2.0 is a demonstration appointment desk inspired by the flow of a transport-office queue. It is **not** an official Department of Land Transport service. Bookings, QR codes, and verification results exist only in this application's database.
 
 The notice below is shown throughout the interface:
 

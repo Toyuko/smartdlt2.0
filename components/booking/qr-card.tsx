@@ -50,7 +50,7 @@ export function QrCard({ verificationUrl, reference }: { verificationUrl: string
         onClick={() => {
           const link = document.createElement("a");
           link.href = canvasRef.current?.toDataURL("image/png") ?? "";
-          link.download = `violet-desk-demo-${reference}.png`;
+          link.download = `smartdlt2.0-${reference}.png`;
           link.click();
         }}
       >
