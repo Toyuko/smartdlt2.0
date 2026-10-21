@@ -67,6 +67,30 @@ export function formatTime(iso: string) {
   }).format(new Date(iso));
 }
 
+export function formatBookingDate(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  const parts = bangkokDateParts(date);
+  return `${String(parts.day).padStart(2, "0")}/${String(parts.month).padStart(2, "0")}/${parts.year}`;
+}
+
+export function formatSlotRange(startsAt: string, endsAt: string) {
+  const start = clock12(startsAt);
+  const end = clock12(endsAt);
+  if (!start || !end) return "—";
+  if (start.suffix === end.suffix) return `${start.hm}–${end.hm} ${start.suffix}`;
+  return `${start.hm} ${start.suffix}–${end.hm} ${end.suffix}`;
+}
+
+function clock12(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  const parts = bangkokDateParts(date);
+  const suffix = parts.hour >= 12 ? "PM" : "AM";
+  const hour12 = parts.hour % 12 === 0 ? 12 : parts.hour % 12;
+  return { hm: `${String(hour12).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`, suffix };
+}
+
 export function shiftIsoDate(isoDate: string, days: number) {
   const date = new Date(`${isoDate}T12:00:00+07:00`);
   date.setUTCDate(date.getUTCDate() + days);

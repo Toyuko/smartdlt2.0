@@ -42,6 +42,23 @@ export type DocumentSet = {
   items: DocumentItem[];
 };
 
+export type DressCodeGuidance = {
+  titleEn: string;
+  titleTh: string;
+  noteEn: string;
+  noteTh: string;
+  itemsEn: string[];
+  itemsTh: string[];
+};
+
+export type SavedGuidance = {
+  id: string;
+  titleEn: string;
+  titleTh: string;
+  items: DocumentItem[];
+  dressCode: DressCodeGuidance | null;
+};
+
 export type RenewalWindow = {
   maxDaysBeforeExpiry: number;
   maxDaysAfterExpiry: number;
@@ -586,6 +603,117 @@ export function inferLicenceClass(serviceSlug: string, answers: Record<string, s
   if (serviceSlug.endsWith("-car")) return "car";
   if (serviceSlug.endsWith("-motorcycle")) return "motorcycle";
   return "";
+}
+
+const PHYSICAL_TEST_DRESS: DressCodeGuidance = {
+  titleEn: "Demo dress code for a sample physical test",
+  titleTh: "การแต่งกายตัวอย่างสำหรับการทดสอบสาธิต",
+  noteEn:
+    "Demo guidance only. Confirm clothing rules with the office you actually visit before a real appointment. This note is not an official instruction.",
+  noteTh: "เป็นคำแนะนำสาธิตเท่านั้น โปรดยืนยันกฎการแต่งกายกับสำนักงานที่ไปติดต่อจริงก่อนวันนัด นี่ไม่ใช่คำสั่งทางการ",
+  itemsEn: [
+    "For this sample physical-test visit, wear a shirt with sleeves.",
+    "Wear trousers or a skirt that covers the legs. Shorts are outside this demo note.",
+    "Wear shoes that cover the foot. This demo note excludes flip-flops and sandals.",
+  ],
+  itemsTh: [
+    "สำหรับการทดสอบตัวอย่างนี้ ให้ใส่เสื้อมีแขน",
+    "ใส่กางเกงขายาวหรือกระโปรงที่คลุมขา กางเกงขาสั้นอยู่นอกบันทึกสาธิตนี้",
+    "ใส่รองเท้าที่ปิดเท้า บันทึกสาธิตนี้ไม่รวมรองเท้าแตะ",
+  ],
+};
+
+export function dressCodeFor(categorySlug: string): DressCodeGuidance | null {
+  if (categorySlug === "new-thai-licence") return PHYSICAL_TEST_DRESS;
+  return null;
+}
+
+export function snapshotGuidance(category: BookingCategory | null, context: GuidanceContext): SavedGuidance {
+  if (!category) {
+    return {
+      id: "demo-general",
+      titleEn: "Sample checklist",
+      titleTh: "รายการตัวอย่าง",
+      dressCode: null,
+      items: [
+        item("copy", "Print or save this demonstration confirmation.", "พิมพ์หรือบันทึกใบยืนยันของระบบสาธิตนี้"),
+        item(
+          "example",
+          "Confirm every requirement through official channels before a real visit.",
+          "โปรดตรวจข้อกำหนดผ่านช่องทางทางการก่อนไปติดต่อจริง",
+        ),
+      ],
+    };
+  }
+  const set = selectDocumentSet(category, context);
+  return {
+    id: set.id,
+    titleEn: set.titleEn,
+    titleTh: set.titleTh,
+    items: set.items,
+    dressCode: dressCodeFor(category.slug),
+  };
+}
+
+export function parseSavedGuidance(value: unknown): SavedGuidance | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  if (typeof record.id !== "string" || typeof record.titleEn !== "string" || typeof record.titleTh !== "string") return null;
+  if (!Array.isArray(record.items) || record.items.length === 0) return null;
+  const items = record.items.flatMap((entry) => {
+    if (!entry || typeof entry !== "object") return [];
+    const itemRecord = entry as Record<string, unknown>;
+    const kind = itemRecord.kind;
+    if (kind !== "original" && kind !== "copy" && kind !== "example") return [];
+    if (typeof itemRecord.en !== "string" || typeof itemRecord.th !== "string") return [];
+    return [
+      {
+        kind,
+        en: itemRecord.en,
+        th: itemRecord.th,
+        validityEn: typeof itemRecord.validityEn === "string" ? itemRecord.validityEn : undefined,
+        validityTh: typeof itemRecord.validityTh === "string" ? itemRecord.validityTh : undefined,
+      } satisfies DocumentItem,
+    ];
+  });
+  if (items.length === 0) return null;
+  return {
+    id: record.id,
+    titleEn: record.titleEn,
+    titleTh: record.titleTh,
+    items,
+    dressCode: parseDressCode(record.dressCode),
+  };
+}
+
+function parseDressCode(value: unknown): DressCodeGuidance | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  const itemsEn = textList(record.itemsEn);
+  const itemsTh = textList(record.itemsTh);
+  if (
+    typeof record.titleEn !== "string" ||
+    typeof record.titleTh !== "string" ||
+    typeof record.noteEn !== "string" ||
+    typeof record.noteTh !== "string" ||
+    itemsEn.length === 0 ||
+    itemsTh.length === 0
+  ) {
+    return null;
+  }
+  return {
+    titleEn: record.titleEn,
+    titleTh: record.titleTh,
+    noteEn: record.noteEn,
+    noteTh: record.noteTh,
+    itemsEn,
+    itemsTh,
+  };
+}
+
+function textList(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
 }
 
 export function selectDocumentSet(category: BookingCategory, context: GuidanceContext) {

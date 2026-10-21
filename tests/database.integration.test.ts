@@ -200,6 +200,63 @@ describe("reservation database", () => {
     }
   });
 
+  it("stores the guidance snapshot and does not open that booking with another token hash", async () => {
+    await db.query(
+      `insert into time_slots (id, office_id, service_id, starts_at, ends_at, capacity)
+       values ('21212121-2121-4121-8121-212121212121', '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', now() + interval '5 days', now() + interval '5 days 1 hour', 1)`,
+    );
+    const guidance = {
+      id: "new-foreign",
+      titleEn: "Sample checklist — foreign applicant",
+      titleTh: "รายการตัวอย่าง",
+      items: [{ kind: "example", en: "Synthetic display name only.", th: "ใช้เฉพาะชื่อสมมติ" }],
+      dressCode: null,
+    };
+    const hash = "a".repeat(64);
+    await db.query(
+      `select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14::jsonb) as result`,
+      [
+        "11111111-1111-4111-8111-111111111111",
+        "22222222-2222-4222-8222-222222222222",
+        "21212121-2121-4121-8121-212121212121",
+        "car",
+        "Sample Visitor",
+        null,
+        null,
+        null,
+        "20202020-2020-4020-8020-202020202020",
+        "VD-TEST-GUID",
+        hash,
+        null,
+        "{}",
+        JSON.stringify(guidance),
+      ],
+    );
+    const saved = await db.query(`select document_guidance->>'id' as id, reference from bookings where verification_token_hash = $1`, [hash]);
+    expect(row<{ id: string; reference: string }>(saved).reference).toBe("VD-TEST-GUID");
+    expect(row<{ id: string }>(saved).id).toBe("new-foreign");
+    const other = await db.query(`select reference from bookings where verification_token_hash = $1`, ["b".repeat(64)]);
+    expect(other.rows).toHaveLength(0);
+    await expect(
+      db.query(`select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14::jsonb)`, [
+        "11111111-1111-4111-8111-111111111111",
+        "22222222-2222-4222-8222-222222222222",
+        "21212121-2121-4121-8121-212121212121",
+        "car",
+        "Sample Visitor",
+        null,
+        null,
+        null,
+        "23232323-2323-4232-8232-232323232323",
+        "VD-TEST-GID2",
+        "c".repeat(64),
+        null,
+        "{}",
+        JSON.stringify({ id: "x", titleEn: "x", titleTh: "x", items: [{ kind: "example", en: "123456789", th: "เลข" }] }),
+      ]),
+    ).rejects.toThrow(/validation/);
+  });
+
   it("enforces the rate limit window", async () => {
     const first = await db.query(`select public.consume_rate_limit('booking_create', 'hash', 2, 3600) as allowed`);
     const second = await db.query(`select public.consume_rate_limit('booking_create', 'hash', 2, 3600) as allowed`);

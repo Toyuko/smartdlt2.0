@@ -2,7 +2,7 @@
 
 SmartDLT2.0 is an independently hosted demonstration of a multistep appointment desk. It is not the Department of Land Transport Smart Queue, and it must not be described as issuing or validating official appointments.
 
-The schema contract is the ordered SQL in `supabase/migrations/`. `20261021143000_init.sql` creates the booking tables. `20261021223000_booking_categories.sql` adds configurable categories, applicant category, and answer storage without replacing existing bookings. Do not add a second booking model or an in-memory fallback that pretends to persist appointments.
+The schema contract is the ordered SQL in `supabase/migrations/`. `20261021143000_init.sql` creates the booking tables. `20261021223000_booking_categories.sql` adds configurable categories, applicant category, and answer storage without replacing existing bookings. `20261022013000_booking_ticket_guidance.sql` stores the sample document checklist chosen for a booking. Apply it before deploying the ticket pages. Do not add a second booking model or an in-memory fallback that pretends to persist appointments.
 
 ## Milestones
 
@@ -22,8 +22,9 @@ Browser wizard
     -> Zod validation
     -> rate limit
     -> reserve_demo_booking()  (row lock + capacity check + insert)
-  -> confirmation page
-    -> QR encodes only {APP_ORIGIN}/v/{opaque-token}
+  -> /booking-confirmation/{reference}
+    -> QR encodes only {APP_ORIGIN}/demo-ticket/{opaque-token}
+    -> scanning opens /demo-ticket/{opaque-token} and loads that row by token hash
 
 Staff browser
   -> Supabase Auth session cookie
@@ -46,7 +47,7 @@ Token and reference checks return one of: valid demo booking, already checked in
 
 ## What the QR may contain
 
-The QR payload is a URL on this application's origin whose path is `/v/` plus the opaque token. It has no query string and no applicant name, email, phone, notes, or document numbers.
+The QR payload is a URL on this application's origin whose path is `/demo-ticket/` plus the opaque token. It has no query string and no applicant name, email, phone, notes, or document numbers. Older `/v/{token}` links redirect to that ticket. The confirmation page is `/booking-confirmation/{reference}`. Staff status changes stay on `transition_booking`.
 
 ## Row Level Security
 
@@ -58,7 +59,7 @@ Anon and authenticated clients may read active offices, services, vehicle catego
 | --- | --- |
 | UI and wizard | `components/`, `app/(public pages)`, `lib/i18n/` |
 | Database and security | `supabase/migrations/`, `lib/data/`, `lib/booking/create-booking.ts`, `scripts/seed.ts`, `scripts/reset-demo.ts` |
-| QR and staff | `lib/booking/tokens.ts`, `app/staff/`, `app/v/`, `app/api/staff/` |
+| QR and staff | `lib/booking/ticket.ts`, `lib/booking/tokens.ts`, `app/demo-ticket/`, `app/booking-confirmation/`, `app/staff/`, `app/api/staff/` |
 | QA | `tests/`, `e2e/`, `scripts/smoke-preview.ts` |
 
 ## Environment

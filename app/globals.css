@@ -8,6 +8,7 @@
   --color-brand: #5b2bbd;
   --color-brand-dark: #3d188c;
   --color-brand-soft: #f3edff;
+  --color-mist: #eef4fb;
   --color-good: #0d7a45;
   --color-full: #c4233a;
   --font-sans: var(--font-source), var(--font-thai), ui-sans-serif, sans-serif;
@@ -25,16 +26,31 @@ body {
 }
 
 @media print {
-  .no-print {
+  .no-print,
+  header,
+  footer {
     display: none !important;
   }
 
-  body {
-    background: white;
+  body,
+  .confirmation-page,
+  .ticket-page {
+    background: white !important;
   }
 
-  .print-card {
+  .print-card,
+  .qr-print {
     box-shadow: none !important;
-    border: 1px solid #d8d0e6;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-disclaimer {
+    display: block !important;
+    color: #3d188c !important;
+  }
+
+  .print-documents {
+    display: block !important;
   }
 }

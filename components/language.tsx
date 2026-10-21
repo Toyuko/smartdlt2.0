@@ -56,7 +56,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <div id="content" className="flex-1">
           {children}
         </div>
-        <footer className="border-t border-line px-4 py-6 text-center text-sm text-muted">{t.footer}</footer>
+        <footer className="no-print border-t border-line px-4 py-6 text-center text-sm text-muted">{t.footer}</footer>
       </div>
     </I18nContext.Provider>
   );

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildVerificationUrl, isReference, parseScanPayload } from "@/lib/booking/codes";
+import { buildVerificationUrl, isReference, parseScanPayload, resolveTicketOrigin } from "@/lib/booking/codes";
 import { createDemoBooking, type BookingWriter } from "@/lib/booking/create-booking";
 import { decideVerificationOutcome } from "@/lib/booking/outcomes";
 import { toPublicBooking, type PublicBooking } from "@/lib/booking/public-view";
@@ -28,6 +28,7 @@ const booking: PublicBooking = {
   categoryLabelTh: "ต่ออายุใบอนุญาตขับขี่ไทย",
   applicantCategory: "thai",
   answers: {},
+  guidance: null,
   startsAt: "2026-10-29T01:00:00.000Z",
   endsAt: "2026-10-29T02:00:00.000Z",
 };
@@ -89,7 +90,7 @@ describe("demo booking rules", () => {
 
   it("puts only an opaque verification URL in the QR payload", async () => {
     const result = await createDemoBooking(writer(), request, { keyHash: "ip", origin: "https://demo.example" });
-    expect(result.verificationUrl).toMatch(/^https:\/\/demo\.example\/v\/[^/?#]+$/);
+    expect(result.verificationUrl).toMatch(/^https:\/\/demo\.example\/demo-ticket\/[^/?#]+$/);
     expect(result.verificationUrl).not.toContain("visitor@example.com");
     expect(result.verificationUrl).not.toContain("Sample");
     expect(result.booking).not.toHaveProperty("contactEmail");
@@ -120,10 +121,29 @@ describe("demo booking rules", () => {
     expect(isReference(generateReference())).toBe(true);
   });
 
+  it("builds ticket links from the deployment origin", () => {
+    const previous = process.env.APP_BASE_URL;
+    try {
+      process.env.APP_BASE_URL = "https://smartdlt2.vercel.app/";
+      expect(resolveTicketOrigin({ get: () => "localhost:3000" })).toBe("https://smartdlt2.vercel.app");
+      delete process.env.APP_BASE_URL;
+      expect(
+        resolveTicketOrigin({
+          get: (name) => (name === "x-forwarded-proto" ? "https" : name === "host" ? "preview.example" : null),
+        }),
+      ).toBe("https://preview.example");
+    } finally {
+      if (previous === undefined) delete process.env.APP_BASE_URL;
+      else process.env.APP_BASE_URL = previous;
+    }
+  });
+
   it("accepts only this application's verification URL", () => {
     const token = "a".repeat(32);
     const url = buildVerificationUrl("https://demo.example", token);
     expect(parseScanPayload(url, ["https://demo.example"])).toEqual({ type: "token", token });
+    expect(parseScanPayload(`https://demo.example/v/${token}`, ["https://demo.example"])).toEqual({ type: "token", token });
+    expect(parseScanPayload("https://evil.example/demo-ticket/" + token, ["https://demo.example"]).type).toBe("rejected");
     expect(parseScanPayload("https://evil.example/v/" + token, ["https://demo.example"]).type).toBe("rejected");
     expect(parseScanPayload("VD-SAMP-CONF", ["https://demo.example"])).toEqual({ type: "reference", reference: "VD-SAMP-CONF" });
     expect(parseScanPayload(`${url}?email=a@example.com`, ["https://demo.example"]).type).toBe("rejected");

@@ -85,6 +85,7 @@ describe("demonstration interface", () => {
       categoryLabelTh: "ใบอนุญาตขับขี่ไทยใหม่",
       applicantCategory: "thai",
       answers: {},
+      guidance: null,
       startsAt: "2026-10-29T01:00:00.000Z",
       endsAt: "2026-10-29T02:00:00.000Z",
     };

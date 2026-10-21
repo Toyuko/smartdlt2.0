@@ -1,5 +1,5 @@
 import "server-only";
-import { categoryBySlug, categoryFromRow, stringRecord } from "@/lib/booking/categories";
+import { categoryBySlug, categoryFromRow, parseSavedGuidance, stringRecord } from "@/lib/booking/categories";
 import type { BookingCategory } from "@/lib/booking/categories";
 import { decideVerificationOutcome, type BookingStatus, type VerificationOutcome } from "@/lib/booking/outcomes";
 import type { BookingContext, BookingWriter, ReserveInput, ReserveResult } from "@/lib/booking/create-booking";
@@ -63,14 +63,14 @@ export type AuditEntry = {
 };
 
 const PUBLIC_COLUMNS = `
-  id, reference, status, applicant_display_name, vehicle_category, applicant_category, answers,
+  id, reference, status, applicant_display_name, vehicle_category, applicant_category, answers, document_guidance,
   offices!bookings_office_id_fkey ( name, name_th, province, province_th, demo_label ),
   services!bookings_service_id_fkey ( name, name_th, category, category_th, slug ),
   time_slots!bookings_time_slot_id_fkey ( starts_at, ends_at )
 `;
 
 const STAFF_COLUMNS = `
-  id, reference, status, applicant_display_name, vehicle_category, applicant_category, answers,
+  id, reference, status, applicant_display_name, vehicle_category, applicant_category, answers, document_guidance,
   contact_email, contact_phone, notes, created_at, checked_in_at, completed_at, cancelled_at,
   office_id, service_id, time_slot_id,
   offices!bookings_office_id_fkey ( name, name_th, province, province_th, demo_label ),
@@ -130,6 +130,7 @@ function mapPublic(row: Record<string, unknown>): PublicBooking {
     categoryLabelTh: categoryBySlug(service.category)?.nameTh ?? String(service.category_th ?? service.category),
     applicantCategory: row.applicant_category ? String(row.applicant_category) : null,
     answers: stringRecord(row.answers),
+    guidance: parseSavedGuidance(row.document_guidance),
     startsAt: slot.starts_at,
     endsAt: slot.ends_at,
   };
@@ -263,6 +264,7 @@ export function createSupabaseBookingWriter(): BookingWriter {
         p_token_hash: input.tokenHash,
         p_applicant_category: input.applicantCategory,
         p_answers: input.answers,
+        p_document_guidance: input.documentGuidance,
       });
       if (error) fail(error, "reserve_failed");
       const result = data as ReserveResult;
@@ -280,6 +282,14 @@ export function createSupabaseBookingWriter(): BookingWriter {
 export async function getPublicByReference(reference: string) {
   const admin = createAdminClient();
   const { data, error } = await admin.from("bookings").select(PUBLIC_COLUMNS).eq("reference", reference).maybeSingle();
+  if (error) fail(error, "booking_unavailable");
+  return data ? mapPublic(data as unknown as Record<string, unknown>) : null;
+}
+
+export async function getPublicByTokenHash(tokenHash: string) {
+  if (!/^[a-f0-9]{64}$/.test(tokenHash)) return null;
+  const admin = createAdminClient();
+  const { data, error } = await admin.from("bookings").select(PUBLIC_COLUMNS).eq("verification_token_hash", tokenHash).maybeSingle();
   if (error) fail(error, "booking_unavailable");
   return data ? mapPublic(data as unknown as Record<string, unknown>) : null;
 }

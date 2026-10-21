@@ -1,5 +1,5 @@
 import { buildVerificationUrl } from "@/lib/booking/codes";
-import { validateSelection, type BookingCategory } from "@/lib/booking/categories";
+import { inferLicenceClass, snapshotGuidance, validateSelection, type BookingCategory, type SavedGuidance } from "@/lib/booking/categories";
 import { toPublicBooking, type PublicBooking } from "@/lib/booking/public-view";
 import { generateReference, generateToken, hashToken } from "@/lib/booking/tokens";
 import { bookingRequestSchema, fieldErrorsFromZod } from "@/lib/booking/validation";
@@ -20,6 +20,7 @@ export type ReserveInput = {
   tokenHash: string;
   applicantCategory: string | null;
   answers: Record<string, string>;
+  documentGuidance: SavedGuidance;
 };
 
 export type BookingContext = {
@@ -74,6 +75,12 @@ export async function createDemoBooking(
   if (!decision.ok) {
     throw new HttpError(400, "validation", "Check the highlighted fields.", decision.fieldErrors);
   }
+  const documentGuidance = snapshotGuidance(context.category, {
+    applicantCategory: data.applicantCategory,
+    serviceSlug: context.serviceSlug,
+    licenceClass: inferLicenceClass(context.serviceSlug, decision.answers, data.vehicleCategory),
+    licenceType: decision.answers.currentLicenceType ?? "",
+  });
 
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -94,6 +101,7 @@ export async function createDemoBooking(
         tokenHash: hashToken(token),
         applicantCategory: data.applicantCategory,
         answers: decision.answers,
+        documentGuidance,
       });
       const booking = await writer.getPublicById(reserved.id);
       if (!booking) throw new HttpError(500, "server_error");

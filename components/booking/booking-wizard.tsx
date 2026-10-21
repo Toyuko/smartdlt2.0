@@ -303,11 +303,10 @@ export function BookingWizard() {
         setFormError(body.error ?? "server_error");
         return;
       }
-      if (body.token) window.sessionStorage.setItem(`vd-token:${body.reference}`, body.token);
       if (body.verificationUrl) window.sessionStorage.setItem(`vd-verify-url:${body.reference}`, body.verificationUrl);
       window.sessionStorage.removeItem("vd-draft");
       window.sessionStorage.removeItem("vd-idempotency");
-      router.push(`/booking/${body.reference}`);
+      router.push(`/booking-confirmation/${body.reference}`);
     } catch {
       setFormError("server_error");
     } finally {

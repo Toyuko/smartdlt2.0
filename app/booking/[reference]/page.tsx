@@ -1,15 +1,8 @@
-import { Suspense } from "react";
-import type { Metadata } from "next";
-import { BookingConfirmation } from "@/components/booking/confirmation";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Demonstration booking", robots: { index: false, follow: false } };
+export const instant = false;
 
-export default function BookingPage() {
-  return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <Suspense fallback={<p className="text-sm text-muted">Loading confirmation…</p>}>
-        <BookingConfirmation />
-      </Suspense>
-    </main>
-  );
+export default async function LegacyBookingPage({ params }: { params: Promise<{ reference: string }> }) {
+  const { reference } = await params;
+  redirect(`/booking-confirmation/${encodeURIComponent(reference)}`);
 }

@@ -1,3 +1,4 @@
+import type { SavedGuidance } from "@/lib/booking/categories";
 import type { BookingStatus } from "@/lib/booking/outcomes";
 
 export type PublicBooking = {
@@ -19,6 +20,7 @@ export type PublicBooking = {
   categoryLabelTh: string;
   applicantCategory: string | null;
   answers: Record<string, string>;
+  guidance: SavedGuidance | null;
   startsAt: string;
   endsAt: string;
 };
@@ -43,6 +45,7 @@ export function toPublicBooking(booking: PublicBooking): PublicBooking {
     categoryLabelTh: booking.categoryLabelTh,
     applicantCategory: booking.applicantCategory,
     answers: booking.answers,
+    guidance: booking.guidance,
     startsAt: booking.startsAt,
     endsAt: booking.endsAt,
   };

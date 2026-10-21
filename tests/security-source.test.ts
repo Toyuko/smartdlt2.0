@@ -26,6 +26,9 @@ describe("security boundaries", () => {
     expect(sql).not.toMatch(/verification_token\s+text/);
     expect(sql.toLowerCase()).not.toContain("passport");
     expect(sql.toLowerCase()).not.toContain("national_id");
+    const guidance = readFileSync("supabase/migrations/20261022013000_booking_ticket_guidance.sql", "utf8");
+    expect(guidance).toContain("document_guidance");
+    expect(guidance).not.toMatch(/verification_token\s+text/);
     expect(sql).toContain("for update");
     expect(sql).toContain("enable row level security");
   });

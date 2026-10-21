@@ -56,7 +56,9 @@ Keep `STAFF_PASSWORD` and `SUPABASE_SERVICE_ROLE_KEY` in the environment only. T
 
 ## Verification behaviour
 
-A QR code contains only `{APP_BASE_URL}/v/{opaque-token}`. The database stores the SHA-256 hash of that token. The raw token is returned once, when the booking is created. Lookup by reference still shows the public summary.
+A QR code contains only `{APP_BASE_URL}/demo-ticket/{opaque-token}`. Set `APP_BASE_URL` to the public origin of the deployment that should open when the code is scanned. The database stores the SHA-256 hash of that token. The raw token is returned once, when the booking is created, and is not written to the database. Opening the QR loads `/demo-ticket/{token}` from the database. `/booking-confirmation/{reference}` shows the same saved booking. Lookup by reference still shows the public summary.
+
+Apply `supabase/migrations/20261022013000_booking_ticket_guidance.sql` with the earlier migrations before using the new ticket pages. It adds `bookings.document_guidance` and extends `reserve_demo_booking`. The service-role key stays on the server.
 
 Staff scan and manual entry return one of: valid demo booking, already checked in, cancelled, completed, expired or invalid token, or booking not found. "Valid" means the row exists here. It does not mean a government office accepted it.
 
@@ -88,7 +90,7 @@ A true two-connection race is serialized in Postgres by `SELECT … FOR UPDATE` 
 1. Push this repository to GitHub.
 2. Import it as a Vercel project. Framework preset: Next.js.
 3. Add the environment variables from `.env.example` for Preview and Production. Use different Supabase projects if you want the preview data isolated. Set `APP_BASE_URL` to that deployment's public origin so QR codes do not point at localhost.
-4. Apply the migration to the matching Supabase project and run the seed with that project's service-role key.
+4. Apply every file in `supabase/migrations/` to the matching Supabase project, including `20261022013000_booking_ticket_guidance.sql`, and run the seed with that project's service-role key.
 5. Open a preview deployment and run:
 
 ```bash
