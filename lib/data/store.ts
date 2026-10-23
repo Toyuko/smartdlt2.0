@@ -7,6 +7,7 @@ import type { PublicBooking } from "@/lib/booking/public-view";
 import { hashToken } from "@/lib/booking/tokens";
 import { HttpError, httpErrorFromDb, readDbCode } from "@/lib/http";
 import { monthRangeBangkok } from "@/lib/time";
+import { createVideoPreviewWriter, findVideoPreviewBooking, videoPreviewEnabled } from "@/lib/booking/video-preview";
 import { createAdminClient, createAnonClient } from "@/lib/supabase/clients";
 
 type QueryError = { message?: string; details?: string } | null;
@@ -218,6 +219,7 @@ export async function getAvailability(officeId: string, serviceId: string, month
 }
 
 export function createSupabaseBookingWriter(): BookingWriter {
+  if (videoPreviewEnabled()) return createVideoPreviewWriter();
   return {
     async consumeRateLimit(bucket, keyHash, limit, windowSeconds) {
       const admin = createAdminClient();
@@ -280,6 +282,7 @@ export function createSupabaseBookingWriter(): BookingWriter {
 }
 
 export async function getPublicByReference(reference: string) {
+  if (videoPreviewEnabled()) return findVideoPreviewBooking({ reference });
   const admin = createAdminClient();
   const { data, error } = await admin.from("bookings").select(PUBLIC_COLUMNS).eq("reference", reference).maybeSingle();
   if (error) fail(error, "booking_unavailable");
@@ -288,6 +291,7 @@ export async function getPublicByReference(reference: string) {
 
 export async function getPublicByTokenHash(tokenHash: string) {
   if (!/^[a-f0-9]{64}$/.test(tokenHash)) return null;
+  if (videoPreviewEnabled()) return findVideoPreviewBooking({ tokenHash });
   const admin = createAdminClient();
   const { data, error } = await admin.from("bookings").select(PUBLIC_COLUMNS).eq("verification_token_hash", tokenHash).maybeSingle();
   if (error) fail(error, "booking_unavailable");
