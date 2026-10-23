@@ -49,39 +49,21 @@ export function GuidancePanel({ guidance }: { guidance: SavedGuidance }) {
 }
 
 export function BilingualGuidance({ guidance }: { guidance: SavedGuidance }) {
-  const dress = guidance.dressCode;
   return (
-    <div className="space-y-6" data-testid="ticket-guidance">
-      <div>
-        <h3 className="text-lg font-bold">{guidance.titleTh}</h3>
-        <p className="text-sm text-muted">{guidance.titleEn}</p>
-      </div>
-      <p className="text-sm font-semibold leading-6 text-brand-dark">{SAMPLE_GUIDANCE_NOTE}</p>
-      <ol className="list-decimal space-y-4 pl-5 text-sm leading-6">
-        {guidance.items.map((item, index) => (
-          <li key={`${guidance.id}-${index}`}>
-            <span className="block">{item.th}</span>
-            <span className="mt-1 block text-muted">{item.en}</span>
-            {item.validityEn ? <span className="mt-1 block text-muted">{item.validityEn}</span> : null}
-          </li>
-        ))}
-      </ol>
-      {dress ? (
-        <section aria-label={dress.titleEn}>
-          <h3 className="text-lg font-bold">{dress.titleTh}</h3>
-          <p className="text-sm text-muted">{dress.titleEn}</p>
-          <p className="mt-2 text-sm font-semibold leading-6 text-brand-dark">{dress.noteEn}</p>
-          <p className="mt-1 text-sm leading-6 text-muted">{dress.noteTh}</p>
-          <ol className="mt-3 list-decimal space-y-3 pl-5 text-sm leading-6">
-            {dress.itemsEn.map((line, index) => (
-              <li key={line}>
-                <span className="block">{dress.itemsTh[index] ?? line}</span>
-                <span className="mt-1 block text-muted">{line}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      ) : null}
-    </div>
+    <section data-testid="ticket-guidance">
+      <h2 className="text-[17px] font-bold text-[#1a1a1a]">คำแนะนำ</h2>
+      <p className="mt-3 text-[13px] leading-6 text-[#6d6d78]">{ticketGuidanceCopy(guidance)}</p>
+    </section>
   );
+}
+
+function ticketGuidanceCopy(guidance: SavedGuidance) {
+  const dress = guidance.dressCode;
+  const numbered = guidance.items.map((item, index) => `${index + 1}. ${item.th}`).join(" ");
+  const dressLine = dress ? `**${dress.titleTh} - ${dress.itemsTh.join(" - ")} ***${dress.noteTh}***` : "";
+  return [dressLine, guidance.titleTh, "ต้องเตรียมเอกสารดังต่อไปนี้", numbered, "เอกสารที่ต้องใช้", numbered]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
 }

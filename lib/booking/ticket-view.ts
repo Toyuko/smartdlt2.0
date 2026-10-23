@@ -2,7 +2,7 @@ import { categoryBySlug, inferLicenceClass, snapshotGuidance, type SavedGuidance
 import type { VerificationOutcome } from "@/lib/booking/outcomes";
 import type { PublicBooking } from "@/lib/booking/public-view";
 import { vehicleCategorySeed } from "@/lib/demo-catalog";
-import { formatBookingDate, formatSlotRange } from "@/lib/time";
+import { formatAppointmentDate, formatAppointmentRange, formatBookingDate, formatSlipRound, formatSlotRange } from "@/lib/time";
 
 export const TICKET_STATUS: Record<VerificationOutcome, string> = {
   valid: "Valid demo record — not an official DLT confirmation.",
@@ -15,6 +15,18 @@ export const TICKET_STATUS: Record<VerificationOutcome, string> = {
 };
 
 export const DATABASE_RETRY = "The demonstration database is unavailable. Retry in a moment.";
+
+export const TICKET_STATUS_TH: Record<VerificationOutcome, string> = {
+  valid: "รายการสาธิตที่ถูกต้อง — ไม่ใช่การยืนยันของกรมการขนส่งทางบก",
+  cancelled: "ยกเลิกแล้ว — รายการสาธิต",
+  already_checked_in: "เช็กอินแล้ว — รายการสาธิต",
+  completed: "เสร็จสิ้น — รายการสาธิต",
+  expired: "หมดอายุ — รายการสาธิต",
+  invalid: "ไม่พบการจองสาธิต",
+  not_found: "ไม่พบการจองสาธิต",
+};
+
+export const DATABASE_RETRY_TH = "ฐานข้อมูลสาธิตไม่พร้อมใช้งาน โปรดลองอีกครั้งในอีกสักครู่";
 
 export function guidanceForBooking(
   booking: Pick<PublicBooking, "guidance" | "category" | "applicantCategory" | "serviceSlug" | "answers" | "vehicleCategory">,
@@ -42,10 +54,34 @@ export function vehicleLabel(
   return locale === "th" ? known.name_th : known.name;
 }
 
+export function applicantShort(category: string | null) {
+  if (category === "foreign") return "ชาวต่างชาติ";
+  if (category === "thai") return "บุคคลทั่วไป";
+  return "";
+}
+
+function splitDisplayName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { first: "—", last: "—" };
+  if (parts.length === 1) return { first: parts[0], last: "—" };
+  return { first: parts.slice(0, -1).join(" "), last: parts[parts.length - 1] };
+}
+
 export function presentTicket(booking: PublicBooking, locale: "en" | "th") {
+  const names = splitDisplayName(booking.applicantDisplayName);
+  const applicant = applicantShort(booking.applicantCategory);
+  const categoryUpper = (locale === "th" ? booking.categoryLabelTh : booking.categoryLabel).toUpperCase();
   return {
     date: formatBookingDate(booking.startsAt),
     round: formatSlotRange(booking.startsAt, booking.endsAt),
+    slipRound: formatSlipRound(booking.startsAt, booking.endsAt),
+    ticketDate: formatAppointmentDate(booking.startsAt),
+    ticketTime: formatAppointmentRange(booking.startsAt, booking.endsAt),
+    applicantShort: applicant,
+    categoryUpper,
+    bookingType: applicant ? `${applicant}: ${booking.categoryLabel.toUpperCase()}` : booking.categoryLabel.toUpperCase(),
+    firstName: names.first,
+    lastName: names.last,
     category: locale === "th" ? booking.categoryLabelTh : booking.categoryLabel,
     service: locale === "th" ? booking.serviceNameTh : booking.serviceName,
     office: locale === "th" ? booking.officeNameTh : booking.officeName,

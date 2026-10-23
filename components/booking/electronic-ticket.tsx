@@ -4,19 +4,35 @@ import { BilingualGuidance } from "@/components/booking/document-guidance";
 import { QrCard } from "@/components/booking/qr-card";
 import { StaffDemoActions } from "@/components/booking/staff-demo-actions";
 import type { BookingStatus, VerificationOutcome } from "@/lib/booking/outcomes";
-import { DATABASE_RETRY, presentTicket, TICKET_STATUS } from "@/lib/booking/ticket-view";
-import { DEMO_NOTICE } from "@/lib/demo-notice";
-import { en, th } from "@/lib/i18n/dictionary";
+import { DATABASE_RETRY_TH, presentTicket, TICKET_STATUS_TH } from "@/lib/booking/ticket-view";
+import { DEMO_NOTICE_TH } from "@/lib/demo-notice";
+import { th } from "@/lib/i18n/dictionary";
 import type { PublicBooking } from "@/lib/booking/public-view";
+
+const SHEET = {
+  title: "ใบนัดอิเล็กทรอนิกส์(E-Booking)",
+  personal: "ข้อมูลส่วนตัว",
+  citizenId: "หมายเลขประจำตัวประชาชน",
+  firstName: "ชื่อ",
+  lastName: "นามสกุล",
+  booking: "ข้อมูลการจอง",
+  province: "จังหวัดที่ทำการจอง",
+  office: "สำนักงานที่ทำการจอง",
+  type: "ประเภทการจอง",
+  appointment: "ข้อมูลการนัดหมาย",
+  code: "รหัสการจอง",
+  date: "วันที่นัด",
+  time: "เวลา",
+} as const;
 
 export function TicketUnavailable() {
   return (
-    <div className="ticket-page mx-auto w-full max-w-lg px-4 py-10 text-center">
+    <div lang="th" className="ticket-page mx-auto w-full max-w-lg px-4 py-10 text-center">
       <p role="alert" className="text-lg font-bold" data-testid="ticket-retry">
-        {DATABASE_RETRY}
+        {DATABASE_RETRY_TH}
       </p>
       <a href="." className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-brand px-5 font-semibold text-white">
-        {en.ticket.retry}
+        {th.ticket.retry}
       </a>
     </div>
   );
@@ -24,12 +40,12 @@ export function TicketUnavailable() {
 
 export function TicketMissing() {
   return (
-    <div className="ticket-page mx-auto w-full max-w-lg px-4 py-10">
+    <div lang="th" className="ticket-page mx-auto w-full max-w-lg px-4 py-10">
       <p role="alert" className="text-lg font-bold" data-testid="ticket-status">
-        {TICKET_STATUS.invalid}
+        {TICKET_STATUS_TH.invalid}
       </p>
       <p className="print-disclaimer mt-4 text-sm font-bold leading-6 text-brand-dark" data-testid="print-disclaimer">
-        {DEMO_NOTICE}
+        {DEMO_NOTICE_TH}
       </p>
     </div>
   );
@@ -48,61 +64,47 @@ export function ElectronicTicket({
   imageSrc: string;
   staff: { bookingId: string; status: BookingStatus } | null;
 }) {
-  const view = presentTicket(booking, "en");
+  const view = presentTicket(booking, "th");
+  const bookingType = view.applicantShort ? `${view.applicantShort}: ${view.categoryTh}` : view.categoryTh;
   return (
-    <div className="ticket-page bg-white px-4 py-6">
-      <article data-testid="ticket-sheet" className="ticket-sheet mx-auto w-full max-w-lg overflow-x-hidden lg:max-w-xl">
-        <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-brand text-center text-sm font-bold leading-tight text-white" aria-hidden="true">
-          Smart
-          <br />
-          DLT2.0
+    <div lang="th" className="ticket-page min-h-dvh bg-white px-5 py-8">
+      <article data-testid="ticket-sheet" className="ticket-sheet mx-auto w-full max-w-lg overflow-x-hidden">
+        <p className="print-disclaimer slip-legal" data-testid="print-disclaimer">
+          {DEMO_NOTICE_TH}
+        </p>
+        <Seal />
+        <h1 className="mt-5 text-center text-[22px] font-bold tracking-tight text-[#1c1c1c]">{SHEET.title}</h1>
+        <p data-testid="ticket-status" role="status" className={outcome === "valid" ? "slip-legal" : "mx-auto mt-4 max-w-md rounded-2xl bg-brand-soft px-4 py-3 text-center text-sm font-bold leading-6 text-brand-dark"}>
+          {TICKET_STATUS_TH[outcome]}
+        </p>
+
+        <Section title={SHEET.personal}>
+          <Field label={SHEET.citizenId} value={view.reference} />
+          <Field label={SHEET.firstName} value={view.firstName} />
+          <Field label={SHEET.lastName} value={view.lastName} />
+        </Section>
+
+        <Section title={SHEET.booking}>
+          <Field label={SHEET.province} value={view.provinceTh} />
+          <Field label={SHEET.office} value={view.officeTh} />
+          <Field label={SHEET.type} value={bookingType} />
+        </Section>
+
+        <Section title={SHEET.appointment}>
+          <Field label={SHEET.code} value={view.reference} />
+          <Field label={SHEET.date} value={view.ticketDate} />
+          <Field label={SHEET.time} value={view.ticketTime} />
+        </Section>
+
+        <div className="mt-8">
+          <BilingualGuidance guidance={view.guidance} />
         </div>
-        <p className="mt-3 text-center text-xs font-semibold uppercase tracking-wide text-brand">SmartDLT2.0</p>
-        <h1 className="mt-4 text-center text-2xl font-bold">{en.ticket.title}</h1>
-        <p className="mt-1 text-center text-lg font-semibold">{th.ticket.title}</p>
-        <p className="print-disclaimer mt-4 text-center text-sm font-bold leading-6 text-brand-dark" data-testid="print-disclaimer">
-          {DEMO_NOTICE}
-        </p>
-        <p data-testid="ticket-status" role="status" className="mt-4 rounded-2xl bg-brand-soft px-4 py-3 text-center text-sm font-bold leading-6 text-brand-dark">
-          {TICKET_STATUS[outcome]}
-        </p>
 
-        <TicketSection title={en.ticket.personal} titleTh={th.ticket.personal}>
-          <TicketField label={en.ticket.name} labelTh={th.ticket.name} value={view.name} tone="white" />
-          <TicketField label={en.confirm.demoReference} labelTh={th.confirm.demoReference} value={view.reference} tone="mist" />
-        </TicketSection>
-
-        <TicketSection title={en.ticket.bookingInfo} titleTh={th.ticket.bookingInfo}>
-          <TicketField label={en.ticket.province} labelTh={th.ticket.province} value={view.provinceEn} secondary={view.provinceTh} tone="white" />
-          <TicketField label={en.ticket.office} labelTh={th.ticket.office} value={view.officeEn} secondary={view.officeTh} tone="mist" />
-          <TicketField label={en.ticket.category} labelTh={th.ticket.category} value={view.categoryEn} secondary={view.categoryTh} tone="white" />
-          <TicketField label={en.ticket.service} labelTh={th.ticket.service} value={view.serviceEn} secondary={view.serviceTh} tone="mist" />
-          {view.vehicleEn ? (
-            <TicketField label={en.ticket.vehicle} labelTh={th.ticket.vehicle} value={view.vehicleEn} secondary={view.vehicleTh} tone="white" />
-          ) : null}
-        </TicketSection>
-
-        <TicketSection title={en.ticket.appointment} titleTh={th.ticket.appointment}>
-          <TicketField label={en.staff.reference} labelTh={th.staff.reference} value={view.reference} tone="white" />
-          <TicketField label={en.ticket.date} labelTh={th.ticket.date} value={view.date} tone="mist" />
-          <TicketField label={en.ticket.time} labelTh={th.ticket.time} value={view.round} tone="white" />
-          <TicketField label={en.ticket.status} labelTh={th.ticket.status} value={TICKET_STATUS[outcome]} tone="mist" />
-          <p className="px-4 py-3 text-center text-xs text-muted">{en.ticket.clock}</p>
-        </TicketSection>
-
-        <section className="mt-8">
-          <h2 className="text-lg font-bold">{th.ticket.guidance}</h2>
-          <p className="text-sm text-muted">{en.ticket.guidance}</p>
-          <div className="mt-3 rounded-3xl border border-line px-4 py-4">
-            <BilingualGuidance guidance={view.guidance} />
-          </div>
-        </section>
-
-        <section className="qr-print mt-8 rounded-3xl border border-line p-4">
-          {ticketUrl ? <QrCard verificationUrl={ticketUrl} reference={booking.reference} imageSrc={imageSrc} heading={en.confirm.saveImage} /> : null}
-          <p className="no-print mt-4 text-center">
-            <Link href={`/booking-confirmation/${booking.reference}`} className="inline-flex min-h-11 items-center font-semibold text-brand-dark">
-              {en.ticket.return}
+        <section className="qr-print mt-10">
+          {ticketUrl ? <QrCard verificationUrl={ticketUrl} reference={booking.reference} imageSrc={imageSrc} layout="ticket" /> : null}
+          <p className="no-print mt-8 text-center">
+            <Link href={`/booking-confirmation/${booking.reference}`} className="inline-flex min-h-11 items-center text-sm text-[#6d6d78]">
+              {th.ticket.return}
             </Link>
           </p>
         </section>
@@ -112,8 +114,8 @@ export function ElectronicTicket({
             bookingId={staff.bookingId}
             status={staff.status}
             reference={booking.reference}
-            category={view.categoryEn}
-            service={view.serviceEn}
+            category={view.categoryTh}
+            service={view.serviceTh}
           />
         ) : null}
       </article>
@@ -121,35 +123,39 @@ export function ElectronicTicket({
   );
 }
 
-function TicketSection({ title, titleTh, children }: { title: string; titleTh: string; children: ReactNode }) {
+function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mt-8">
-      <h2 className="text-lg font-bold">{titleTh}</h2>
-      <p className="text-sm text-muted">{title}</p>
-      <div className="mt-3 overflow-hidden rounded-3xl border border-line">{children}</div>
+      <h2 className="text-[17px] font-bold text-[#1a1a1a]">{title}</h2>
+      {children}
     </section>
   );
 }
 
-function TicketField({
-  label,
-  labelTh,
-  value,
-  secondary,
-  tone,
-}: {
-  label: string;
-  labelTh: string;
-  value: string;
-  secondary?: string;
-  tone: "white" | "mist";
-}) {
+function Field({ label, value }: { label: string; value: string }) {
   return (
-    <div className={tone === "mist" ? "bg-mist px-4 py-4 text-center" : "bg-white px-4 py-4 text-center"}>
-      <p className="text-sm text-muted">{labelTh}</p>
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</p>
-      <p className="mt-1 break-words text-base font-semibold text-brand-dark">{value}</p>
-      {secondary ? <p className="mt-1 break-words text-sm text-muted">{secondary}</p> : null}
+    <div className="mt-5">
+      <p className="text-sm text-[#8b8b96]">{label}</p>
+      <p className="mt-1 break-words text-[15px] leading-6 text-[#1a1a1a]">{value}</p>
     </div>
+  );
+}
+
+function Seal() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 120 120" className="mx-auto h-28 w-28">
+      <circle cx="60" cy="60" r="58" fill="#4c1d95" />
+      <circle cx="60" cy="60" r="52" fill="none" stroke="#e7c56a" strokeWidth="2.5" />
+      <circle cx="60" cy="60" r="46" fill="#5b21b6" />
+      <circle cx="60" cy="60" r="28" fill="none" stroke="#f0d48a" strokeWidth="3" />
+      <circle cx="60" cy="60" r="8" fill="#f0d48a" />
+      {Array.from({ length: 8 }, (_, index) => {
+        const angle = (index * Math.PI) / 4;
+        const x2 = 60 + Math.cos(angle) * 22;
+        const y2 = 60 + Math.sin(angle) * 22;
+        return <line key={index} x1="60" y1="60" x2={x2} y2={y2} stroke="#f0d48a" strokeWidth="2.5" />;
+      })}
+      <circle cx="60" cy="60" r="40" fill="none" stroke="#d6b25e" strokeWidth="1" />
+    </svg>
   );
 }

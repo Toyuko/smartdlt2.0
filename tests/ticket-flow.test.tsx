@@ -8,7 +8,7 @@ import { ElectronicTicket, TicketMissing, TicketUnavailable } from "@/components
 import { AppProviders } from "@/components/language";
 import { categoryBySlug, snapshotGuidance } from "@/lib/booking/categories";
 import { createDemoBooking, type BookingWriter } from "@/lib/booking/create-booking";
-import { DATABASE_RETRY, TICKET_STATUS } from "@/lib/booking/ticket-view";
+import { DATABASE_RETRY_TH, TICKET_STATUS_TH } from "@/lib/booking/ticket-view";
 import { formatBookingDate, formatSlotRange } from "@/lib/time";
 import { DEMO_NOTICE, DEMO_QR_CODE_WARNING } from "@/lib/demo-notice";
 import type { PublicBooking } from "@/lib/booking/public-view";
@@ -78,11 +78,11 @@ describe("booking confirmation and electronic ticket", () => {
     expect(formatSlotRange(startsAt, endsAt)).toBe("08:00–09:00 AM");
     expect(screen.getByRole("heading", { name: "Booking information" })).toBeInTheDocument();
     expect(screen.getByText("29/10/2026")).toBeInTheDocument();
-    expect(screen.getByText("08:00–09:00 AM")).toBeInTheDocument();
-    expect(screen.getByText("New Thai Driving Licence")).toBeInTheDocument();
-    expect(screen.getByText("First-time application — motorcycle")).toBeInTheDocument();
+    expect(screen.getByText("08:00 - 09:00 AM")).toBeInTheDocument();
+    expect(screen.getByText("ชาวต่างชาติ")).toBeInTheDocument();
+    expect(screen.getByText("NEW THAI DRIVING LICENCE")).toBeInTheDocument();
     expect(screen.getByText("Sample Visitor")).toBeInTheDocument();
-    expect(screen.getByText("Chiang Mai")).toBeInTheDocument();
+    expect(screen.getAllByText("VD-TEST-BOOK").length).toBeGreaterThan(0);
     expect(screen.getByTestId("office-name")).toHaveTextContent("SmartDLT2.0 Riverside Demo Office with a long display name");
     expect(screen.getByTestId("office-name").className).toContain("break-words");
     expect(screen.getByText("Motorcycle")).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe("booking confirmation and electronic ticket", () => {
     expect(screen.getByTestId("confirmation-layout").className).toContain("max-w-md");
     expect(screen.getByTestId("confirmation-layout").className).toContain("lg:max-w-xl");
     expect(screen.getByTestId("confirmation-layout").className).toContain("overflow-x-hidden");
-    await userEvent.click(screen.getByRole("button", { name: "Required Documents to Prepare" }));
+    await userEvent.click(screen.getByRole("button", { name: "Required Documents to prepare" }));
     expect(screen.getByText("Sample checklist — foreign applicant")).toBeInTheDocument();
     expect(screen.queryByText("Sample checklist — Thai applicant, car")).not.toBeInTheDocument();
     expect(screen.getByText("Demo dress code for a sample physical test")).toBeInTheDocument();
@@ -138,12 +138,18 @@ describe("booking confirmation and electronic ticket", () => {
       </AppProviders>,
     );
     expect(getItem).not.toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "Electronic Booking Ticket (Demo)" })).toBeInTheDocument();
-    expect(screen.getByText("ใบนัดอิเล็กทรอนิกส์ (ระบบสาธิต)")).toBeInTheDocument();
-    expect(screen.getByTestId("ticket-status")).toHaveTextContent(TICKET_STATUS.valid);
+    expect(screen.getByRole("heading", { name: "ใบนัดอิเล็กทรอนิกส์(E-Booking)" })).toBeInTheDocument();
+    expect(screen.getByText("Sample")).toBeInTheDocument();
+    expect(screen.getByText("Visitor")).toBeInTheDocument();
+    expect(screen.getByText("เชียงใหม่")).toBeInTheDocument();
+    expect(screen.getByText("สำนักงานสาธิตชื่อยาว")).toBeInTheDocument();
+    expect(screen.getByText("ชาวต่างชาติ: ใบอนุญาตขับขี่ไทยใหม่")).toBeInTheDocument();
+    expect(screen.getByText("08:00 - 09:00 น.")).toBeInTheDocument();
+    expect(screen.getByTestId("ticket-status")).toHaveTextContent(TICKET_STATUS_TH.valid);
     expect(screen.getByTestId("qr-print")).toHaveAttribute("data-qr-payload", ticketUrl);
-    expect(screen.getByRole("link", { name: "Return to booking confirmation" })).toHaveAttribute("href", "/booking-confirmation/VD-TEST-BOOK");
-    expect(screen.getByTestId("ticket-guidance")).toHaveTextContent("Sample checklist — foreign applicant");
+    expect(screen.getByRole("link", { name: "กลับไปหน้ายืนยันการจอง" })).toHaveAttribute("href", "/booking-confirmation/VD-TEST-BOOK");
+    expect(screen.getByTestId("ticket-guidance")).toHaveTextContent("รายการตัวอย่าง — ผู้ขอต่างชาติ");
+    expect(screen.getByTestId("ticket-guidance")).not.toHaveTextContent("Sample checklist");
     expect(screen.getByTestId("ticket-sheet").className).toContain("max-w-lg");
     expect(screen.queryByRole("button", { name: "Check in" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("staff-demo-actions")).not.toBeInTheDocument();
@@ -155,7 +161,7 @@ describe("booking confirmation and electronic ticket", () => {
         <ElectronicTicket booking={{ ...booking, status: "cancelled" }} outcome="cancelled" ticketUrl={ticketUrl} imageSrc="data:image/png;base64,iVBORw0KGgo=" staff={null} />
       </AppProviders>,
     );
-    expect(screen.getByTestId("ticket-status")).toHaveTextContent("Cancelled — demo record.");
+    expect(screen.getByTestId("ticket-status")).toHaveTextContent(TICKET_STATUS_TH.cancelled);
     cleanup();
     render(
       <AppProviders>
@@ -168,7 +174,7 @@ describe("booking confirmation and electronic ticket", () => {
         />
       </AppProviders>,
     );
-    expect(screen.getByTestId("ticket-status")).toHaveTextContent("Completed — demo record.");
+    expect(screen.getByTestId("ticket-status")).toHaveTextContent(TICKET_STATUS_TH.completed);
     expect(screen.getByRole("button", { name: "Check in" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Mark completed" })).toBeDisabled();
     cleanup();
@@ -183,7 +189,7 @@ describe("booking confirmation and electronic ticket", () => {
         />
       </AppProviders>,
     );
-    expect(screen.getByTestId("ticket-status")).toHaveTextContent("Already checked in — demo record.");
+    expect(screen.getByTestId("ticket-status")).toHaveTextContent(TICKET_STATUS_TH.already_checked_in);
     expect(screen.getByRole("button", { name: "Check in" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Mark completed" })).toBeEnabled();
   });
@@ -216,11 +222,11 @@ describe("booking confirmation and electronic ticket", () => {
 
   it("explains a missing token and a database outage without inventing a booking", () => {
     render(<TicketMissing />);
-    expect(screen.getByRole("alert")).toHaveTextContent("Demo booking not found.");
+    expect(screen.getByRole("alert")).toHaveTextContent(TICKET_STATUS_TH.invalid);
     expect(screen.queryByText("Sample Visitor")).not.toBeInTheDocument();
     cleanup();
     render(<TicketUnavailable />);
-    expect(screen.getByTestId("ticket-retry")).toHaveTextContent(DATABASE_RETRY);
+    expect(screen.getByTestId("ticket-retry")).toHaveTextContent(DATABASE_RETRY_TH);
     expect(screen.queryByText("Sample Visitor")).not.toBeInTheDocument();
   });
 

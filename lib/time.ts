@@ -82,6 +82,26 @@ export function formatSlotRange(startsAt: string, endsAt: string) {
   return `${start.hm} ${start.suffix}–${end.hm} ${end.suffix}`;
 }
 
+export function formatSlipRound(startsAt: string, endsAt: string) {
+  return formatSlotRange(startsAt, endsAt).replaceAll("–", " - ");
+}
+
+export function formatAppointmentDate(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("th-TH-u-ca-buddhist", {
+    timeZone: BANGKOK,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+export function formatAppointmentRange(startsAt: string, endsAt: string) {
+  if (Number.isNaN(new Date(startsAt).getTime()) || Number.isNaN(new Date(endsAt).getTime())) return "—";
+  return `${formatTime(startsAt)} - ${formatTime(endsAt)} น.`;
+}
+
 function clock12(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return null;

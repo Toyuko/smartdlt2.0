@@ -24,6 +24,8 @@ export function errorText(errors: Dictionary["errors"], code: string | undefined
 }
 
 export function AppProviders({ children }: { children: ReactNode }) {
+  const pathname = usePathname() ?? "/";
+  const immersive = pathname.startsWith("/booking-confirmation") || pathname.startsWith("/demo-ticket");
   const [locale, setLocaleState] = useState<Locale>("en");
 
   useEffect(() => {
@@ -49,14 +51,16 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-3 focus:py-2">
           Skip to content
         </a>
-        <DemoBanner />
-        <Suspense fallback={<div className="h-16 border-b border-line bg-white" />}>
-          <SiteHeader />
-        </Suspense>
+        <div className={immersive ? "max-lg:hidden" : undefined}>
+          <DemoBanner />
+          <Suspense fallback={<div className="h-16 border-b border-line bg-white" />}>
+            <SiteHeader />
+          </Suspense>
+        </div>
         <div id="content" className="flex-1">
           {children}
         </div>
-        <footer className="no-print border-t border-line px-4 py-6 text-center text-sm text-muted">{t.footer}</footer>
+        <footer className={`no-print border-t border-line px-4 py-6 text-center text-sm text-muted ${immersive ? "max-lg:hidden" : ""}`}>{t.footer}</footer>
       </div>
     </I18nContext.Provider>
   );

@@ -12,13 +12,13 @@ import { SetupError } from "@/lib/http";
 
 export const instant = false;
 export const metadata: Metadata = {
-  title: "Electronic Booking Ticket (Demo)",
+  title: "ใบนัดอิเล็กทรอนิกส์(E-Booking)",
   robots: { index: false, follow: false },
 };
 
 export default function DemoTicketPage({ params }: { params: Promise<{ token: string }> }) {
   return (
-    <Suspense fallback={<p className="px-4 py-8 text-sm text-muted">Loading the demo ticket…</p>}>
+    <Suspense fallback={<p lang="th" className="px-4 py-8 text-sm text-muted">กำลังโหลดใบนัด…</p>}>
       <DemoTicketLoader params={params} />
     </Suspense>
   );
@@ -43,7 +43,7 @@ async function DemoTicketLoader({ params }: { params: Promise<{ token: string }>
           errorCorrectionLevel: "H",
           margin: 2,
           width: 320,
-          color: { dark: "#1d1630", light: "#ffffff" },
+          color: { dark: "#111111", light: "#ffffff" },
         });
       } catch {
         imageSrc = "";
