@@ -23,9 +23,11 @@ export function errorText(errors: Dictionary["errors"], code: string | undefined
   return code in errors ? errors[code as keyof Dictionary["errors"]] : errors.server_error;
 }
 
+function isImmersivePath(pathname: string) {
+  return pathname.startsWith("/booking-confirmation") || pathname.startsWith("/demo-ticket");
+}
+
 export function AppProviders({ children }: { children: ReactNode }) {
-  const pathname = usePathname() ?? "/";
-  const immersive = pathname.startsWith("/booking-confirmation") || pathname.startsWith("/demo-ticket");
   const [locale, setLocaleState] = useState<Locale>("en");
 
   useEffect(() => {
@@ -51,18 +53,51 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-3 focus:py-2">
           Skip to content
         </a>
-        <div className={immersive ? "max-lg:hidden" : undefined}>
-          <DemoBanner />
-          <Suspense fallback={<div className="h-16 border-b border-line bg-white" />}>
-            <SiteHeader />
-          </Suspense>
-        </div>
+        {/* Pathname is unknown while prerendering dynamic routes, so the chrome that reads it must suspend. */}
+        <Suspense fallback={<ChromeFallback />}>
+          <RouteChrome />
+        </Suspense>
         <div id="content" className="flex-1">
           {children}
         </div>
-        <footer className={`no-print border-t border-line px-4 py-6 text-center text-sm text-muted ${immersive ? "max-lg:hidden" : ""}`}>{t.footer}</footer>
+        <Suspense
+          fallback={<footer className="no-print border-t border-line px-4 py-6 text-center text-sm text-muted">{t.footer}</footer>}
+        >
+          <SiteFooter />
+        </Suspense>
       </div>
     </I18nContext.Provider>
+  );
+}
+
+function ChromeFallback() {
+  return (
+    <>
+      <div className="bg-brand-dark px-4 py-2 text-center text-xs font-semibold leading-5 text-white sm:text-sm">
+        <p>{DEMO_NOTICE}</p>
+      </div>
+      <div className="h-16 border-b border-line bg-white" />
+    </>
+  );
+}
+
+function RouteChrome() {
+  const pathname = usePathname() ?? "/";
+  return (
+    <div className={isImmersivePath(pathname) ? "max-lg:hidden" : undefined}>
+      <DemoBanner />
+      <SiteHeader />
+    </div>
+  );
+}
+
+function SiteFooter() {
+  const { t } = useI18n();
+  const pathname = usePathname() ?? "/";
+  return (
+    <footer className={`no-print border-t border-line px-4 py-6 text-center text-sm text-muted ${isImmersivePath(pathname) ? "max-lg:hidden" : ""}`}>
+      {t.footer}
+    </footer>
   );
 }
 
