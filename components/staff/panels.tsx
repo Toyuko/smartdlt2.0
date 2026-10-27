@@ -90,6 +90,7 @@ export function StaffNav({ displayName }: { displayName: string }) {
   const router = useRouter();
   const links = [
     ["/staff/dashboard", t.staff.dashboard],
+    ["/staff/signup", t.staff.signup],
     ["/staff/bookings", t.staff.bookings],
     ["/staff/scan", t.staff.scan],
     ["/staff/settings", t.staff.settings],
@@ -152,7 +153,12 @@ export function DashboardPanel() {
   return (
     <div className="space-y-4">
       <p className="text-xs font-semibold text-brand-dark">{DEMO_NOTICE}</p>
-      <h1 className="text-3xl font-bold">{t.staff.dashboard}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-bold">{t.staff.dashboard}</h1>
+        <Link href="/staff/signup">
+          <Button>{t.staff.signup}</Button>
+        </Link>
+      </div>
       {error ? <p role="alert">{errorText(t.errors, error)}</p> : null}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map(([label, value]) => (

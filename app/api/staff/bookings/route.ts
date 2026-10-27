@@ -1,8 +1,10 @@
 import { route } from "@/lib/api";
 import { requireStaff } from "@/lib/auth";
+import { createDemoBooking } from "@/lib/booking/create-booking";
+import { hashRateLimitKey } from "@/lib/booking/tokens";
 import { staffFilterSchema } from "@/lib/booking/validation";
-import { staffListBookings } from "@/lib/data/store";
-import { HttpError, json } from "@/lib/http";
+import { createSupabaseBookingWriter, staffListBookings } from "@/lib/data/store";
+import { HttpError, json, requestOrigin } from "@/lib/http";
 
 export const GET = route(async (request) => {
   await requireStaff();
@@ -25,4 +27,15 @@ export const GET = route(async (request) => {
       date: filters.date || undefined,
     }),
   });
+});
+
+export const POST = route(async (request) => {
+  const session = await requireStaff();
+  const body = await request.json().catch(() => null);
+  const result = await createDemoBooking(createSupabaseBookingWriter(), body, {
+    keyHash: hashRateLimitKey(`staff:${session.userId}`),
+    origin: requestOrigin(request),
+    rateLimit: { bucket: "staff_quick_signup", limit: 120, windowSeconds: 60 * 60 },
+  });
+  return json(result, 201);
 });

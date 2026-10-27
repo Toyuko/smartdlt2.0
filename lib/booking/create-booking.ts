@@ -49,14 +49,19 @@ export interface BookingWriter {
 export async function createDemoBooking(
   writer: BookingWriter,
   input: unknown,
-  options: { keyHash: string; origin: string },
+  options: {
+    keyHash: string;
+    origin: string;
+    rateLimit?: { bucket: string; limit: number; windowSeconds: number };
+  },
 ) {
   const parsed = bookingRequestSchema.safeParse(input);
   if (!parsed.success) {
     throw new HttpError(400, "validation", "Check the highlighted fields.", fieldErrorsFromZod(parsed.error));
   }
 
-  const allowed = await writer.consumeRateLimit("booking_create", options.keyHash, 8, 60 * 60);
+  const rateLimit = options.rateLimit ?? { bucket: "booking_create", limit: 8, windowSeconds: 60 * 60 };
+  const allowed = await writer.consumeRateLimit(rateLimit.bucket, options.keyHash, rateLimit.limit, rateLimit.windowSeconds);
   if (!allowed) {
     throw new HttpError(429, "rate_limited", "Too many demonstration bookings from this network. Try again later.");
   }

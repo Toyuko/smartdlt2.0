@@ -113,6 +113,26 @@ describe("demo booking rules", () => {
     ).rejects.toMatchObject({ status: 429, code: "rate_limited" });
   });
 
+  it("keeps the public booking cap unless a caller supplies a desk limit", async () => {
+    const calls: Array<[string, string, number, number]> = [];
+    const limited = writer({
+      consumeRateLimit: async (bucket, keyHash, limit, windowSeconds) => {
+        calls.push([bucket, keyHash, limit, windowSeconds]);
+        return true;
+      },
+    });
+    await createDemoBooking(limited, request, { keyHash: "ip", origin: "https://demo.example" });
+    await createDemoBooking(limited, request, {
+      keyHash: "staff-user",
+      origin: "https://demo.example",
+      rateLimit: { bucket: "staff_quick_signup", limit: 120, windowSeconds: 3600 },
+    });
+    expect(calls).toEqual([
+      ["booking_create", "ip", 8, 3600],
+      ["staff_quick_signup", "staff-user", 120, 3600],
+    ]);
+  });
+
   it("creates unguessable references and token hashes", () => {
     const token = generateToken();
     expect(token.length).toBeGreaterThanOrEqual(32);
