@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { REFERENCE_PATTERN } from "@/lib/booking/codes";
 
 const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i, "invalid_id");
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -70,7 +71,7 @@ export const lookupSchema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^VD-[A-Z2-9]{4}-[A-Z2-9]{4}$/, "reference_invalid"),
+    .regex(REFERENCE_PATTERN, "reference_invalid"),
 });
 
 export const transitionSchema = z.object({

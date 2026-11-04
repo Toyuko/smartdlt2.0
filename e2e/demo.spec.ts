@@ -33,7 +33,7 @@ test("wizard progress stays available on a phone layout", async ({ page }) => {
 test("about page lists scope and sample references", async ({ page }) => {
   await page.goto("/about-demo");
   await expect(page.getByRole("heading", { name: "About this demonstration" })).toBeVisible();
-  await expect(page.getByText("VD-SAMP-CONF")).toBeVisible();
+  await expect(page.getByText("W20261105090001CNF")).toBeVisible();
   await expect(page.getByTestId("demo-banner")).toContainText(notice);
 });
 
@@ -49,7 +49,7 @@ test("lookup rejects a malformed reference without creating data", async ({ page
   await page.goto("/lookup");
   await page.getByLabel("Booking reference").fill("not-a-reference");
   await page.getByRole("button", { name: "Find booking" }).click();
-  await expect(page.getByText("Enter a reference in the form VD-XXXX-XXXX.")).toBeVisible();
+  await expect(page.getByText("Enter a reference like W20261029113827AQD.")).toBeVisible();
 });
 
 test("staff summary is not public", async ({ request }) => {

@@ -234,11 +234,11 @@ export const serviceSeed = [
 ];
 
 export const SAMPLE_REFERENCES = {
-  confirmed: "VD-SAMP-CONF",
-  checkedIn: "VD-SAMP-CHKD",
-  completed: "VD-SAMP-DONE",
-  cancelled: "VD-SAMP-CANC",
-  expired: "VD-SAMP-EXPR",
+  confirmed: "W20261105090001CNF",
+  checkedIn: "W20261105100001CHK",
+  completed: "W20261105110001DON",
+  cancelled: "W20261105120001CAN",
+  expired: "W20261104130001EXP",
 } as const;
 
 export const SLOT_PERIODS = [

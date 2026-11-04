@@ -30,7 +30,7 @@ npm install
 npm run seed
 ```
 
-`npm run seed` upserts fictional offices and services, then adds about two weeks of Bangkok-time slots and a few synthetic bookings. It does not replace existing slots. Sample QR tokens are written to `demo-fixtures.local.json`, which is gitignored. Published references such as `VD-SAMP-CONF` are fixtures, not government identifiers.
+`npm run seed` upserts fictional offices and services, then adds about two weeks of Bangkok-time slots and a few synthetic bookings. It does not replace existing slots. Sample QR tokens are written to `demo-fixtures.local.json`, which is gitignored. Published references such as `W20261105090001CNF` are fixtures, not government identifiers.
 
 5. Start the app:
 

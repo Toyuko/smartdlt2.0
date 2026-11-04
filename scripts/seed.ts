@@ -3,7 +3,7 @@ import { writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { bookingCategorySeed, categoryToRow } from "../lib/booking/categories";
 import { officeSeed, SAMPLE_REFERENCES, serviceSeed, SLOT_CAPACITY, SLOT_PERIODS, vehicleCategorySeed } from "../lib/demo-catalog";
-import { generateToken, hashToken } from "../lib/booking/token-core";
+import { generateReference, generateToken, hashToken } from "../lib/booking/token-core";
 import { bangkokDateParts, shiftIsoDate, weekdayBangkok } from "../lib/time";
 
 type SeedOptions = { replace: boolean };
@@ -212,7 +212,7 @@ function bookingRow(input: {
   const token = input.token ?? generateToken();
   const now = new Date().toISOString();
   return {
-    reference: input.reference ?? generateReferenceSafe(),
+    reference: input.reference ?? generateReference(),
     office_id: input.officeId,
     service_id: input.serviceId,
     time_slot_id: input.slotId,
@@ -225,12 +225,6 @@ function bookingRow(input: {
     completed_at: input.status === "completed" ? now : null,
     cancelled_at: input.status === "cancelled" ? now : null,
   };
-}
-
-function generateReferenceSafe() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const chars = Array.from(crypto.getRandomValues(new Uint8Array(8)), (value) => alphabet[value % alphabet.length]).join("");
-  return `VD-${chars.slice(0, 4)}-${chars.slice(4)}`;
 }
 
 const entry = process.argv[1];

@@ -1,4 +1,4 @@
-const REFERENCE_PATTERN = /^VD-[A-Z2-9]{4}-[A-Z2-9]{4}$/;
+export const REFERENCE_PATTERN = /^(?:VD-[A-Z2-9]{4}-[A-Z2-9]{4}|W\d{14}[A-Z]{3})$/;
 
 export function isReference(value: string) {
   return REFERENCE_PATTERN.test(value);

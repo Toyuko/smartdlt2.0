@@ -138,7 +138,10 @@ describe("demo booking rules", () => {
     expect(token.length).toBeGreaterThanOrEqual(32);
     expect(hashToken(token)).toMatch(/^[a-f0-9]{64}$/);
     expect(hashToken(token)).not.toBe(token);
-    expect(isReference(generateReference())).toBe(true);
+    const reference = generateReference(new Date("2026-10-29T12:00:00+07:00"));
+    expect(reference).toMatch(/^W20261029\d{6}[A-Z]{3}$/);
+    expect(isReference(reference)).toBe(true);
+    expect(isReference("VD-SAMP-CONF")).toBe(true);
   });
 
   it("builds ticket links from the deployment origin", () => {
@@ -166,6 +169,10 @@ describe("demo booking rules", () => {
     expect(parseScanPayload("https://evil.example/demo-ticket/" + token, ["https://demo.example"]).type).toBe("rejected");
     expect(parseScanPayload("https://evil.example/v/" + token, ["https://demo.example"]).type).toBe("rejected");
     expect(parseScanPayload("VD-SAMP-CONF", ["https://demo.example"])).toEqual({ type: "reference", reference: "VD-SAMP-CONF" });
+    expect(parseScanPayload("w20261029113827aqd", ["https://demo.example"])).toEqual({
+      type: "reference",
+      reference: "W20261029113827AQD",
+    });
     expect(parseScanPayload(`${url}?email=a@example.com`, ["https://demo.example"]).type).toBe("rejected");
   });
 
