@@ -1,3 +1,4 @@
+import { officeSeed } from "@/lib/demo-catalog";
 import { bangkokDateParts, shiftIsoDate } from "@/lib/time";
 
 export type FieldOption = {
@@ -119,7 +120,7 @@ export type WizardStepId =
   | "schedule"
   | "review";
 
-const ALL_OFFICES = ["riverside", "canal", "coastal", "campus"];
+const ALL_OFFICES = officeSeed.map((office) => office.slug);
 
 const baseRules: SlotRules = { timezone: "Asia/Bangkok", horizonDays: 21 };
 

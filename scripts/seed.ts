@@ -39,20 +39,24 @@ export async function seedDemo(options: SeedOptions) {
     if (wipeError) throw new Error(wipeError.message);
   }
 
-  const existing = await supabase.from("time_slots").select("id", { count: "exact", head: true });
-  if (existing.error) throw new Error(existing.error.message);
-  if ((existing.count ?? 0) > 0) {
+  const officeRows = offices.data ?? [];
+  const activeSlugs = new Set(serviceSeed.filter((item) => item.active !== false).map((item) => item.slug));
+  const serviceRows = (services.data ?? []).filter((service) => activeSlugs.has(service.slug));
+  const missingOffices = [];
+  for (const office of officeRows) {
+    const existing = await supabase.from("time_slots").select("id", { count: "exact", head: true }).eq("office_id", office.id);
+    if (existing.error) throw new Error(existing.error.message);
+    if ((existing.count ?? 0) === 0) missingOffices.push(office);
+  }
+  if (!missingOffices.length) {
     console.log("Time slots already exist. Run npm run reset-demo to replace bookings and slots.");
     return;
   }
 
-  const officeRows = offices.data ?? [];
-  const activeSlugs = new Set(serviceSeed.filter((item) => item.active !== false).map((item) => item.slug));
-  const serviceRows = (services.data ?? []).filter((service) => activeSlugs.has(service.slug));
   const dates = upcomingDates(14);
   const now = Date.now();
   const slotRows = [];
-  for (const office of officeRows) {
+  for (const office of missingOffices) {
     for (const service of serviceRows) {
       for (const date of dates) {
         for (const [start, end] of SLOT_PERIODS) {
@@ -76,8 +80,12 @@ export async function seedDemo(options: SeedOptions) {
     if (inserted.error) throw new Error(inserted.error.message);
   }
 
-  await insertSamples(supabase, officeRows, serviceRows);
-  console.log("Demo offices, services, slots, and sample bookings are ready.");
+  if (missingOffices.length === officeRows.length) {
+    await insertSamples(supabase, officeRows, serviceRows);
+    console.log("Demo offices, services, slots, and sample bookings are ready.");
+    return;
+  }
+  console.log(`Added time slots for ${missingOffices.map((office) => office.slug).join(", ")}.`);
 }
 
 function upcomingDates(count: number) {

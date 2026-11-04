@@ -13,7 +13,7 @@ import {
   visibleFields,
   type BookingCategory,
 } from "@/lib/booking/categories";
-import { serviceSeed } from "@/lib/demo-catalog";
+import { officeSeed, serviceSeed } from "@/lib/demo-catalog";
 import { HttpError } from "@/lib/http";
 import { bookingRequestSchema } from "@/lib/booking/validation";
 
@@ -30,6 +30,26 @@ function selection(overrides: Parameters<typeof validateSelection>[0]) {
 }
 
 describe("booking categories", () => {
+  it("offers the five Bangkok transport offices for the usual categories", () => {
+    const bangkok = officeSeed.filter((office) => office.slug.startsWith("bkk-area-"));
+    expect(bangkok.map((office) => office.name_th)).toEqual([
+      "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 1 (บางขุนเทียน)",
+      "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 2 (ตลิ่งชัน)",
+      "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 3 (พระโขนง)",
+      "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 4 (หนองจอก)",
+      "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 5 (จตุจักร)",
+    ]);
+    for (const office of bangkok) {
+      expect(office.province).toBe("Bangkok");
+      expect(office.province_th).toBe("กรุงเทพมหานคร");
+      expect(office.demo_label.length).toBeGreaterThan(0);
+    }
+    for (const category of bookingCategorySeed) {
+      if (category.slug === "international-permit") continue;
+      for (const office of bangkok) expect(category.eligibleOfficeSlugs).toContain(office.slug);
+    }
+  });
+
   it("seeds the six demonstration categories with bilingual names and guidance", () => {
     expect(bookingCategorySeed.map((item) => item.name)).toEqual([
       "New Thai Driving Licence",

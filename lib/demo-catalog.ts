@@ -46,6 +46,46 @@ export const officeSeed = [
     province_th: "ขอนแก่น",
     demo_label: "Demo location — not an official DLT office",
   },
+  {
+    slug: "bkk-area-1",
+    name: "Bangkok Transport Office Area 1 (Bang Khun Thian)",
+    name_th: "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 1 (บางขุนเทียน)",
+    province: "Bangkok",
+    province_th: "กรุงเทพมหานคร",
+    demo_label: "Demo location — not an official DLT office",
+  },
+  {
+    slug: "bkk-area-2",
+    name: "Bangkok Transport Office Area 2 (Taling Chan)",
+    name_th: "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 2 (ตลิ่งชัน)",
+    province: "Bangkok",
+    province_th: "กรุงเทพมหานคร",
+    demo_label: "Demo location — not an official DLT office",
+  },
+  {
+    slug: "bkk-area-3",
+    name: "Bangkok Transport Office Area 3 (Phra Khanong)",
+    name_th: "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 3 (พระโขนง)",
+    province: "Bangkok",
+    province_th: "กรุงเทพมหานคร",
+    demo_label: "Demo location — not an official DLT office",
+  },
+  {
+    slug: "bkk-area-4",
+    name: "Bangkok Transport Office Area 4 (Nong Chok)",
+    name_th: "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 4 (หนองจอก)",
+    province: "Bangkok",
+    province_th: "กรุงเทพมหานคร",
+    demo_label: "Demo location — not an official DLT office",
+  },
+  {
+    slug: "bkk-area-5",
+    name: "Bangkok Transport Office Area 5 (Chatuchak)",
+    name_th: "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 5 (จตุจักร)",
+    province: "Bangkok",
+    province_th: "กรุงเทพมหานคร",
+    demo_label: "Demo location — not an official DLT office",
+  },
 ];
 
 const categoryChecklist = guidance([
