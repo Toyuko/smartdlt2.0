@@ -21,8 +21,9 @@ export async function proxy(request: NextRequest) {
   });
 
   const { data } = await supabase.auth.getUser();
-  const path = request.nextUrl.pathname;
-  if (!data.user && path.startsWith("/staff") && path !== "/staff/login") {
+  const path = request.nextUrl.pathname.replace(/\/$/, "") || "/";
+  const publicStaffPath = path === "/staff/login" || path === "/staff/signup";
+  if (!data.user && path.startsWith("/staff") && !publicStaffPath) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/staff/login";
     redirectUrl.searchParams.set("next", path);

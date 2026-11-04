@@ -69,7 +69,7 @@ describe("staff quick signup", () => {
             slots: [{ id: slotId, starts_at: startsAt, ends_at: endsAt, capacity: 4, remaining: 3 }],
           });
         }
-        if (url === "/api/staff/bookings" && init?.method === "POST") {
+        if (url === "/api/bookings" && init?.method === "POST") {
           posted.push(JSON.parse(String(init.body)));
           return json({ reference: "VD-TEST-BOOK", verificationUrl: "https://demo.example/demo-ticket/opaque-token" }, 201);
         }

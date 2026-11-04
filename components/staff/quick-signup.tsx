@@ -281,7 +281,7 @@ export function QuickSignup() {
     submitLock.current = true;
     setSubmitting(true);
     try {
-      const response = await fetch("/api/staff/bookings", {
+      const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ ...payload, answers: decision.answers }),
