@@ -133,13 +133,24 @@ export const serviceSeed = [
     document_guidance: categoryChecklist,
   },
   {
+    slug: "renewal-car-motorcycle",
+    name: "Renewal — car and motorcycle",
+    name_th: "ต่ออายุ — รถยนต์และรถจักรยานยนต์",
+    category: "thai-renewal",
+    category_th: "ต่ออายุใบอนุญาตขับขี่ไทย",
+    requires_vehicle: false,
+    sort_order: 5,
+    active: true,
+    document_guidance: categoryChecklist,
+  },
+  {
     slug: "conversion",
     name: "Convert a foreign licence",
     name_th: "แปลงใบอนุญาตต่างประเทศ",
     category: "foreign-conversion",
     category_th: "แปลงใบอนุญาตต่างประเทศ",
     requires_vehicle: false,
-    sort_order: 5,
+    sort_order: 6,
     active: true,
     document_guidance: categoryChecklist,
   },
@@ -150,7 +161,7 @@ export const serviceSeed = [
     category: "change-or-replace",
     category_th: "เปลี่ยนหรือออกใบแทน",
     requires_vehicle: true,
-    sort_order: 6,
+    sort_order: 7,
     active: true,
     document_guidance: categoryChecklist,
   },
@@ -161,7 +172,7 @@ export const serviceSeed = [
     category: "change-or-replace",
     category_th: "เปลี่ยนหรือออกใบแทน",
     requires_vehicle: false,
-    sort_order: 7,
+    sort_order: 8,
     active: true,
     document_guidance: categoryChecklist,
   },
@@ -172,7 +183,7 @@ export const serviceSeed = [
     category: "change-or-replace",
     category_th: "เปลี่ยนหรือออกใบแทน",
     requires_vehicle: false,
-    sort_order: 8,
+    sort_order: 9,
     active: true,
     document_guidance: categoryChecklist,
   },
@@ -183,7 +194,7 @@ export const serviceSeed = [
     category: "change-or-replace",
     category_th: "เปลี่ยนหรือออกใบแทน",
     requires_vehicle: true,
-    sort_order: 9,
+    sort_order: 10,
     active: false,
     document_guidance: categoryChecklist,
   },
@@ -194,7 +205,7 @@ export const serviceSeed = [
     category: "international-permit",
     category_th: "ใบอนุญาตขับขี่ระหว่างประเทศ",
     requires_vehicle: true,
-    sort_order: 10,
+    sort_order: 11,
     active: true,
     document_guidance: categoryChecklist,
   },
@@ -205,7 +216,7 @@ export const serviceSeed = [
     category: "other-demo",
     category_th: "บริการสาธิตอื่น",
     requires_vehicle: true,
-    sort_order: 11,
+    sort_order: 12,
     active: true,
     document_guidance: categoryChecklist,
   },
@@ -216,7 +227,7 @@ export const serviceSeed = [
     category: "other-demo",
     category_th: "บริการสาธิตอื่น",
     requires_vehicle: false,
-    sort_order: 12,
+    sort_order: 13,
     active: true,
     document_guidance: categoryChecklist,
   },
@@ -238,3 +249,24 @@ export const SLOT_PERIODS = [
 ] as const;
 
 export const SLOT_CAPACITY = 4;
+
+const serviceChoiceCopy: Record<string, { en: string; th: string }> = {
+  "renewal-car": {
+    en: "Renew a sample car licence.",
+    th: "ต่ออายุใบอนุญาตขับรถยนต์ตัวอย่าง",
+  },
+  "renewal-motorcycle": {
+    en: "Renew a sample motorcycle licence.",
+    th: "ต่ออายุใบอนุญาตขับรถจักรยานยนต์ตัวอย่าง",
+  },
+  "renewal-car-motorcycle": {
+    en: "Renew sample car and motorcycle licences in one visit.",
+    th: "ต่ออายุใบอนุญาตขับรถยนต์และรถจักรยานยนต์ตัวอย่างในการติดต่อครั้งเดียว",
+  },
+};
+
+export function serviceChoiceDetail(slug: string, locale: "en" | "th", fallback: string) {
+  const copy = serviceChoiceCopy[slug];
+  if (!copy) return fallback;
+  return locale === "th" ? copy.th : copy.en;
+}

@@ -44,11 +44,11 @@ export function vehicleLabel(
   booking: Pick<PublicBooking, "vehicleCategory" | "serviceSlug" | "answers">,
   locale: "en" | "th",
 ) {
-  if (booking.answers.foreignLicenceClass === "both") {
+  const licenceClass = inferLicenceClass(booking.serviceSlug, booking.answers, booking.vehicleCategory ?? "");
+  if (booking.answers.foreignLicenceClass === "both" || licenceClass === "both") {
     return locale === "th" ? "รถยนต์และรถจักรยานยนต์" : "Car and motorcycle";
   }
-  const slug =
-    booking.vehicleCategory || inferLicenceClass(booking.serviceSlug, booking.answers, booking.vehicleCategory ?? "");
+  const slug = booking.vehicleCategory || licenceClass;
   const known = vehicleCategorySeed.find((item) => item.slug === slug);
   if (!known) return "";
   return locale === "th" ? known.name_th : known.name;

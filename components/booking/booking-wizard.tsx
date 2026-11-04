@@ -27,6 +27,7 @@ import {
   type WizardStepId,
 } from "@/lib/booking/categories";
 import { bookingRequestSchema, type BookingRequest } from "@/lib/booking/validation";
+import { serviceChoiceDetail } from "@/lib/demo-catalog";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import { bangkokDateParts, formatTime, shiftIsoDate } from "@/lib/time";
 import type { CatalogOffice, CatalogService, CatalogVehicle } from "@/lib/data/store";
@@ -467,7 +468,11 @@ export function BookingWizard() {
                   name="service"
                   checked={values.serviceId === item.id}
                   title={locale === "th" ? item.nameTh : item.name}
-                  detail={item.requiresVehicle ? t.book.vehicleHelp : t.book.serviceHelp}
+                  detail={serviceChoiceDetail(
+                    item.slug,
+                    locale,
+                    item.requiresVehicle ? t.book.vehicleHelp : t.book.serviceHelp,
+                  )}
                   onSelect={() => {
                     form.setValue("serviceId", item.id);
                     form.setValue("vehicleCategory", "");

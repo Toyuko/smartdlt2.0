@@ -8,6 +8,7 @@ import {
   categoryBySlug,
   describeRenewalRules,
   evaluateRenewal,
+  inferLicenceClass,
   selectDocumentSet,
   validateSelection,
   visibleFields,
@@ -109,6 +110,14 @@ describe("booking categories", () => {
   it("keeps disabled subcategory options and services out of the active choices", () => {
     const licenceType = visibleFields(category("thai-renewal"), "renewal-car").find((field) => field.key === "currentLicenceType");
     expect(activeOptions(licenceType!).map((option) => option.value)).toEqual(["temporary", "five_year"]);
+    expect(serviceSeed.find((service) => service.slug === "renewal-car-motorcycle")).toMatchObject({
+      category: "thai-renewal",
+      active: true,
+      name: "Renewal — car and motorcycle",
+    });
+    expect(inferLicenceClass("renewal-car", {}, "")).toBe("car");
+    expect(inferLicenceClass("renewal-motorcycle", {}, "")).toBe("motorcycle");
+    expect(inferLicenceClass("renewal-car-motorcycle", {}, "")).toBe("both");
     expect(serviceSeed.find((service) => service.slug === "class-upgrade")?.active).toBe(false);
     expect(serviceSeed.filter((service) => service.active !== false).some((service) => service.slug === "class-upgrade")).toBe(false);
   });

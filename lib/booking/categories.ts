@@ -601,6 +601,7 @@ export function buildWizardSteps(input: { requiresVehicle: boolean; hasQuestions
 export function inferLicenceClass(serviceSlug: string, answers: Record<string, string>, vehicleCategory: string) {
   if (answers.foreignLicenceClass) return answers.foreignLicenceClass;
   if (vehicleCategory === "car" || vehicleCategory === "motorcycle") return vehicleCategory;
+  if (serviceSlug === "renewal-car-motorcycle") return "both";
   if (serviceSlug.endsWith("-car")) return "car";
   if (serviceSlug.endsWith("-motorcycle")) return "motorcycle";
   return "";
