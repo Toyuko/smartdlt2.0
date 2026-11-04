@@ -1,14 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { MonthCalendar, type DayState } from "@/components/booking/month-calendar";
 import { DocumentGuidance } from "@/components/booking/document-guidance";
 import { RenewalLicenceForm } from "@/components/booking/renewal-licence-form";
 import { errorText, SetupRequired, useI18n } from "@/components/language";
-import { Button, Field, Panel, inputClass } from "@/components/ui";
+import { Button, Field, inputClass, queueFieldClass, queueInputClass } from "@/components/ui";
 import {
   activeOptions,
   answerLabel,
@@ -30,6 +31,7 @@ import {
 import { formatIdentityNumber } from "@/lib/booking/identity";
 import { bookingRequestSchema, type BookingRequest } from "@/lib/booking/validation";
 import { renewalReviewEntries, renewalVehicles } from "@/lib/booking/renewal-form";
+import type { Dictionary } from "@/lib/i18n/dictionary";
 import { serviceChoiceDetail } from "@/lib/demo-catalog";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import { bangkokDateParts, formatVisitRange, shiftIsoDate } from "@/lib/time";
@@ -143,6 +145,7 @@ export function BookingWizard() {
   const service = catalog?.services.find((item) => item.id === values.serviceId);
   const office = catalog?.offices.find((item) => item.id === values.officeId);
   const questions = hasConditionalQuestions(category, service?.slug ?? "");
+  const renewalForm = renewalVehicles(service?.slug ?? "").length > 0;
   const steps = buildWizardSteps({ requiresVehicle: Boolean(service?.requiresVehicle), hasQuestions: questions });
   const step = steps.includes(stepId) ? stepId : "applicant";
   const stepIndex = Math.max(0, steps.indexOf(step));
@@ -322,70 +325,95 @@ export function BookingWizard() {
 
   if (setup) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold">{t.book.title}</h1>
-        <SetupRequired />
-      </div>
+      <QueueFrame>
+        <div className="mx-auto w-full max-w-xl px-5 py-10">
+          <p data-testid="demo-banner" className="text-sm font-semibold text-[#6d28d9]">
+            {DEMO_NOTICE}
+          </p>
+          <h1 className="mt-4 text-2xl font-bold">{t.book.title}</h1>
+          <SetupRequired />
+        </div>
+      </QueueFrame>
     );
   }
   if (!catalog && !loadError) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold">{t.book.title}</h1>
-        <p className="text-sm text-muted">{t.book.loading}</p>
-      </div>
+      <QueueFrame>
+        <div className="mx-auto w-full max-w-xl px-5 py-10">
+          <h1 className="text-2xl font-bold text-[#6d28d9]">{t.book.title}</h1>
+          <p className="mt-2 text-sm text-muted">{t.book.loading}</p>
+        </div>
+      </QueueFrame>
     );
   }
-  if (loadError || !catalog) return <p role="alert">{errorText(t.errors, loadError)}</p>;
+  if (loadError || !catalog) {
+    return (
+      <QueueFrame>
+        <p role="alert" className="px-5 py-10">
+          {errorText(t.errors, loadError)}
+        </p>
+      </QueueFrame>
+    );
+  }
 
   const eligibleCategories = office ? categories.filter((item) => item.eligibleOfficeSlugs.includes(office.slug)) : categories;
 
+  const narrow = step === "questions" || step === "applicant" || step === "applicantCategory";
+  const contentWidth = step === "schedule" ? "max-w-4xl" : narrow ? "max-w-xl" : "max-w-2xl";
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-      <div className="no-print">
-        <p className="mb-3 text-sm font-semibold lg:hidden" data-testid="wizard-compact-progress">
-          {stepIndex + 1} / {steps.length} · {t.book.steps[step]}
-        </p>
-        <ol className="flex flex-col gap-1" aria-label="Progress" data-testid="wizard-steps">
-          {steps.map((item, index) => {
-            const complete = index < stepIndex;
-            const current = item === step;
-            return (
-              <li key={item}>
-                <button
-                  type="button"
-                  className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm ${current ? "bg-white shadow-sm ring-1 ring-line" : ""}`}
-                  onClick={() => {
-                    if (index < stepIndex) setStepId(item);
-                  }}
-                  disabled={index > stepIndex}
-                  aria-current={current ? "step" : undefined}
-                >
-                  <span className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold ${complete || current ? "bg-brand text-white" : "bg-line text-muted"}`}>
-                    {complete ? "✓" : index + 1}
-                  </span>
-                  <span className="font-semibold">{t.book.steps[item]}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-      <Panel>
-        <p className="text-xs font-semibold text-brand-dark" data-testid="wizard-disclaimer">
-          {DEMO_NOTICE}
-        </p>
-        <h1 className="mt-2 text-2xl font-bold">{t.book.title}</h1>
-        <p className="mt-2 text-sm leading-6 text-muted">{helpFor(step, t)}</p>
-        {office && step !== "applicantCategory" && step !== "office" ? (
-          <p className="mt-4 rounded-2xl bg-paper px-4 py-3 text-sm" data-testid="selection-summary">
-            <span className="font-semibold">{locale === "th" ? office.nameTh : office.name}</span>
-            <span className="text-muted"> · {office.demoLabel}</span>
-            {service ? <span className="mt-1 block font-semibold">{locale === "th" ? service.nameTh : service.name}</span> : null}
-            {category ? <span className="block text-muted">{locale === "th" ? category.nameTh : category.name}</span> : null}
+    <QueueFrame
+      sidebar={
+        <>
+          <p className="mb-3 text-sm font-semibold text-[#241b33] lg:hidden" data-testid="wizard-compact-progress">
+            {stepIndex + 1} / {steps.length} · {stepLabel(step, renewalForm, t)}
           </p>
-        ) : null}
-        <div className="mt-6 space-y-4" data-testid={`wizard-panel-${step}`}>
+          <ol className="flex flex-col" aria-label="Progress" data-testid="wizard-steps">
+            {steps.map((item, index) => {
+              const complete = index < stepIndex;
+              const current = item === step;
+              const title = stepLabel(item, renewalForm, t);
+              return (
+                <li key={item}>
+                  <button
+                    type="button"
+                    className="flex w-full items-start gap-3 py-2.5 text-left disabled:cursor-default disabled:opacity-100"
+                    onClick={() => {
+                      if (index < stepIndex) setStepId(item);
+                    }}
+                    disabled={index > stepIndex}
+                    aria-current={current ? "step" : undefined}
+                    aria-label={complete ? `✓${title}` : undefined}
+                  >
+                    <span
+                      className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${complete ? "bg-[#22a85a] text-white" : current ? "bg-[#4c1d95] text-white" : "bg-[#e5e7eb] text-[#9aa0ab]"}`}
+                    >
+                      {complete ? <StepCheck /> : index + 1}
+                    </span>
+                    <span>
+                      <span className="block text-sm font-bold leading-5 text-[#241b33]">{title}</span>
+                      <span className="mt-0.5 block text-xs leading-4 text-[#8b909a]" aria-hidden="true">
+                        {t.book.stepHints[item]}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+          <p className="mt-8 border-t border-[#e5e7eb] pt-4 text-xs leading-5 text-[#5c5470]" data-testid="wizard-disclaimer">
+            {DEMO_NOTICE}
+          </p>
+        </>
+      }
+    >
+      <div className={`mx-auto w-full px-5 py-8 sm:px-8 sm:py-10 ${contentWidth}`}>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <QueueMark />
+          <h1 className="mt-4 text-[22px] font-semibold text-[#6d28d9]">{step === "questions" ? t.book.renewalComplete : step === "applicantCategory" ? t.book.title : stepLabel(step, renewalForm, t)}</h1>
+          {step === "questions" ? null : <p className="mt-2 max-w-lg text-sm leading-6 text-[#6b7280]">{helpFor(step, t)}</p>}
+        </div>
+        <div className="space-y-4" data-testid={`wizard-panel-${step}`}>
           {step === "applicantCategory" ? (
             <>
               <Choice
@@ -501,14 +529,14 @@ export function BookingWizard() {
                 />
               ))
             : null}
-          {step === "questions" && renewalVehicles(service?.slug ?? "").length ? (
+          {step === "questions" && renewalForm ? (
             <>
               <RenewalLicenceForm serviceSlug={service?.slug ?? ""} answers={values.answers} errors={answerErrors} onChange={replaceAnswers} />
               {renewal.state === "outside" ? <p role="alert" className="text-sm font-semibold text-full">{t.book.renewalOutside}</p> : null}
             </>
           ) : null}
-          {step === "questions" && !renewalVehicles(service?.slug ?? "").length ? (
-            <div className="grid gap-4">
+          {step === "questions" && !renewalForm ? (
+            <div className="queue-fields grid gap-5">
               {category && describeRenewalRules(category.slotRules, locale) ? (
                 <p className="text-sm leading-6 text-muted">{describeRenewalRules(category.slotRules, locale)}</p>
               ) : null}
@@ -520,13 +548,13 @@ export function BookingWizard() {
                   <Field key={field.key} label={label} hint={help} error={errorText(t.errors, answerErrors[field.key])}>
                     {field.kind === "date" ? (
                       <input
-                        className={inputClass}
+                        className={queueFieldClass}
                         type="date"
                         value={value}
                         onChange={(event) => setAnswer(field.key, event.target.value)}
                       />
                     ) : (
-                      <select className={inputClass} value={value} onChange={(event) => setAnswer(field.key, event.target.value)}>
+                      <select className={queueInputClass} value={value} onChange={(event) => setAnswer(field.key, event.target.value)}>
                         <option value="">—</option>
                         {activeOptions(field).map((option) => (
                           <option key={option.value} value={option.value}>
@@ -647,7 +675,7 @@ export function BookingWizard() {
           ) : null}
         </div>
         {formError ? <p role="alert" className="mt-4 text-sm font-semibold text-full">{errorText(t.errors, formError)}</p> : null}
-        <div className="mt-6 flex flex-wrap justify-between gap-3">
+        <div className="mt-8 flex flex-wrap justify-between gap-3">
           <Button type="button" variant="secondary" onClick={() => setStepId(steps[Math.max(0, stepIndex - 1)] ?? "applicantCategory")} disabled={stepIndex === 0 || submitting}>
             {t.actions.back}
           </Button>
@@ -669,8 +697,112 @@ export function BookingWizard() {
             </Button>
           )}
         </div>
-      </Panel>
+      </div>
+    </QueueFrame>
+  );
+}
+
+function stepLabel(step: WizardStepId, renewalForm: boolean, t: Dictionary) {
+  if (step === "questions" && renewalForm) return t.book.drivingLicense;
+  return t.book.steps[step];
+}
+
+function QueueFrame({ sidebar, children }: { sidebar?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="flex min-h-dvh flex-col bg-white text-[#241b33]">
+      <QueueHeader />
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {sidebar ? <aside className="no-print shrink-0 bg-[#f3f4f6] px-4 py-4 lg:w-[300px] lg:px-6 lg:py-8">{sidebar}</aside> : null}
+        <main className="queue-scroll min-h-0 flex-1 overflow-y-auto bg-white">{children}</main>
+      </div>
     </div>
+  );
+}
+
+function QueueHeader() {
+  const { t, locale, setLocale } = useI18n();
+  const links = [
+    { href: "/", label: t.book.queueHome, current: true },
+    { href: "/lookup", label: t.book.queueProfile, current: false },
+    { href: "/about-demo", label: t.book.queueHistory, current: false },
+    { href: "/staff/login", label: t.book.queueLogout, current: false },
+  ];
+  return (
+    <header className="no-print flex flex-wrap items-center justify-between gap-y-1 bg-[#4c1d95] px-3 text-white sm:h-16 sm:flex-nowrap sm:px-6">
+      <div className="flex items-center gap-3 py-2">
+        <QueueMark compact />
+        <span className="hidden text-white/70 sm:inline" aria-hidden>
+          |
+        </span>
+        <span className="hidden text-sm font-medium sm:inline">{t.book.queueOrg}</span>
+      </div>
+      <nav className="flex items-stretch" aria-label="Primary">
+        {links.map((link) => (
+          <Link
+            key={link.label}
+            href={link.href}
+            className={`flex items-center px-2.5 text-sm font-medium text-white sm:px-3 ${link.current ? "border-b-4 border-[#e9d5ff]" : ""}`}
+          >
+            {link.label}
+          </Link>
+        ))}
+        <div className="ml-1 flex items-center gap-1 px-1" role="group" aria-label="Language">
+          <button
+            type="button"
+            className={`rounded-full px-2 py-1 text-sm font-semibold ${locale === "en" ? "bg-white/20" : "text-white/75"}`}
+            aria-pressed={locale === "en"}
+            onClick={() => setLocale("en")}
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            className={`rounded-full px-2 py-1 text-sm font-semibold ${locale === "th" ? "bg-white/20" : "text-white/75"}`}
+            aria-pressed={locale === "th"}
+            onClick={() => setLocale("th")}
+          >
+            ไทย
+          </button>
+        </div>
+      </nav>
+    </header>
+  );
+}
+
+function QueueMark({ compact = false }: { compact?: boolean }) {
+  const id = compact ? "queue-mark-sm" : "queue-mark-lg";
+  return (
+    <div className={`flex items-center ${compact ? "gap-1.5" : "flex-col"}`}>
+      <svg viewBox="0 0 64 64" className={compact ? "h-9 w-9" : "h-16 w-16"} aria-hidden>
+        <defs>
+          <linearGradient id={id} x1="8" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor="#ff4b8b" />
+            <stop offset="0.45" stopColor="#ff8a3d" />
+            <stop offset="1" stopColor="#7c3aed" />
+          </linearGradient>
+        </defs>
+        <rect x="10" y="10" width="44" height="44" rx="14" fill={`url(#${id})`} transform="rotate(8 32 32)" />
+        <text x="32" y="41" textAnchor="middle" fontSize="26" fontWeight="700" fill="white" fontFamily="Arial, sans-serif">
+          Q
+        </text>
+      </svg>
+      <span className={compact ? "leading-none text-white" : "mt-1 text-center leading-none"}>
+        <span className={`block font-extrabold tracking-wide ${compact ? "text-[11px]" : "text-lg"}`}>
+          <span className={compact ? "text-white" : "text-[#7c3aed]"}>D</span>
+          <span className={compact ? "text-white" : "text-[#ff4b8b]"}>L</span>
+          <span className={compact ? "text-white" : "text-[#ff8a3d]"}>T</span>
+        </span>
+        <span className={`block font-bold tracking-[0.18em] ${compact ? "text-[7px] text-white/80" : "text-[10px] text-[#7c3aed]"}`}>SMART QUEUE</span>
+      </span>
+    </div>
+  );
+}
+
+function StepCheck() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden>
+      <path d="M3.5 8.2 6.4 11l6.1-6.2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 

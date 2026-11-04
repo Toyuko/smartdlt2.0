@@ -59,3 +59,8 @@ export function Field({
 
 export const inputClass =
   "w-full rounded-2xl border border-line bg-white px-3 py-3 text-base text-ink outline-none ring-brand focus:ring-2";
+
+export const queueFieldClass =
+  "w-full rounded-full border border-[#7c3aed] bg-white px-5 py-3 text-base font-semibold text-[#6d28d9] outline-none focus:ring-2 focus:ring-[#c4b5fd]";
+
+export const queueInputClass = `queue-select ${queueFieldClass} pr-10`;

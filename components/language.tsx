@@ -27,6 +27,10 @@ function isImmersivePath(pathname: string) {
   return pathname.startsWith("/booking-confirmation") || pathname.startsWith("/e-booking") || pathname.startsWith("/demo-ticket");
 }
 
+function isBookPath(pathname: string) {
+  return pathname === "/book" || pathname.startsWith("/book/");
+}
+
 export function AppProviders({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
 
@@ -83,6 +87,7 @@ function ChromeFallback() {
 
 function RouteChrome() {
   const pathname = usePathname() ?? "/";
+  if (isBookPath(pathname)) return null;
   return (
     <div className={isImmersivePath(pathname) ? "max-lg:hidden" : undefined}>
       <DemoBanner />
@@ -94,6 +99,7 @@ function RouteChrome() {
 function SiteFooter() {
   const { t } = useI18n();
   const pathname = usePathname() ?? "/";
+  if (isBookPath(pathname)) return null;
   return (
     <footer className={`no-print border-t border-line px-4 py-6 text-center text-sm text-muted ${isImmersivePath(pathname) ? "max-lg:hidden" : ""}`}>
       {t.footer}
