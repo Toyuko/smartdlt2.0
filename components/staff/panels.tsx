@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { BookingSummary } from "@/components/booking/summary";
 import { errorText, useI18n } from "@/components/language";
 import { answerLabel, categoryBySlug } from "@/lib/booking/categories";
+import { renewalReviewEntries } from "@/lib/booking/renewal-form";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import { Button, Field, Panel, inputClass } from "@/components/ui";
 import { parseScanPayload } from "@/lib/booking/codes";
@@ -328,10 +329,14 @@ export function BookingDetail({ id }: { id: string }) {
         <Info label={t.staff.category} value={locale === "th" ? booking.categoryLabelTh : booking.categoryLabel} />
         <Info label={t.staff.service} value={locale === "th" ? booking.serviceNameTh : booking.serviceName} />
         <Info label={t.staff.date} value={`${formatLongDate(booking.startsAt, locale)} ${formatTime(booking.startsAt)}–${formatTime(booking.endsAt)}`} />
-        {Object.entries(booking.answers).map(([key, value]) => {
-          const labelled = answerLabel(categoryBySlug(booking.category), key, value, locale);
-          return <Info key={key} label={labelled.label} value={labelled.value} />;
-        })}
+        {(renewalReviewEntries(booking.answers, locale) ??
+          Object.entries(booking.answers).map(([key, value]) => ({
+            key,
+            ...answerLabel(categoryBySlug(booking.category), key, value, locale),
+          }))
+        ).map((labelled) => (
+          <Info key={labelled.key} label={labelled.label} value={labelled.value} />
+        ))}
         <Info label={t.book.email} value={booking.contactEmail ?? "—"} />
         <Info label={t.book.phone} value={booking.contactPhone ?? "—"} />
         <Info label={t.book.notes} value={booking.notes ?? "—"} />

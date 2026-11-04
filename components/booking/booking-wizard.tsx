@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { MonthCalendar, type DayState } from "@/components/booking/month-calendar";
 import { DocumentGuidance } from "@/components/booking/document-guidance";
+import { RenewalLicenceForm } from "@/components/booking/renewal-licence-form";
 import { errorText, SetupRequired, useI18n } from "@/components/language";
 import { Button, Field, Panel, inputClass } from "@/components/ui";
 import {
@@ -27,6 +28,7 @@ import {
   type WizardStepId,
 } from "@/lib/booking/categories";
 import { bookingRequestSchema, type BookingRequest } from "@/lib/booking/validation";
+import { renewalReviewEntries, renewalVehicles } from "@/lib/booking/renewal-form";
 import { serviceChoiceDetail } from "@/lib/demo-catalog";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import { bangkokDateParts, formatTime, shiftIsoDate } from "@/lib/time";
@@ -224,15 +226,15 @@ export function BookingWizard() {
   function setAnswer(key: string, value: string) {
     const next = { ...form.getValues("answers"), [key]: value };
     if (!value) delete next[key];
+    replaceAnswers(next);
+  }
+
+  function replaceAnswers(next: Record<string, string>) {
     form.setValue("answers", next);
     if (category && evaluateRenewal(category, next, today).state === "outside") {
       form.setValue("timeSlotId", "");
     }
-    setAnswerErrors((current) => {
-      const rest = { ...current };
-      delete rest[key];
-      return rest;
-    });
+    setAnswerErrors({});
   }
 
   async function next() {
@@ -497,7 +499,13 @@ export function BookingWizard() {
                 />
               ))
             : null}
-          {step === "questions" ? (
+          {step === "questions" && renewalVehicles(service?.slug ?? "").length ? (
+            <>
+              <RenewalLicenceForm serviceSlug={service?.slug ?? ""} answers={values.answers} errors={answerErrors} onChange={replaceAnswers} />
+              {renewal.state === "outside" ? <p role="alert" className="text-sm font-semibold text-full">{t.book.renewalOutside}</p> : null}
+            </>
+          ) : null}
+          {step === "questions" && !renewalVehicles(service?.slug ?? "").length ? (
             <div className="grid gap-4">
               {category && describeRenewalRules(category.slotRules, locale) ? (
                 <p className="text-sm leading-6 text-muted">{describeRenewalRules(category.slotRules, locale)}</p>
@@ -612,10 +620,11 @@ export function BookingWizard() {
               <Review label={t.confirm.category} value={category ? (locale === "th" ? category.nameTh : category.name) : ""} />
               <Review label={t.staff.service} value={service ? (locale === "th" ? service.nameTh : service.name) : ""} />
               {values.vehicleCategory ? <Review label={t.confirm.vehicle} value={vehicleLabel(vehicleChoices, values.vehicleCategory, locale)} /> : null}
-              {Object.entries(values.answers).map(([key, value]) => {
-                const labelled = answerLabel(category, key, value, locale);
-                return <Review key={key} label={labelled.label} value={labelled.value} />;
-              })}
+              {(renewalReviewEntries(values.answers, locale) ??
+                Object.entries(values.answers).map(([key, value]) => answerLabel(category, key, value, locale))
+              ).map((labelled) => (
+                <Review key={`${labelled.label}-${labelled.value}`} label={labelled.label} value={labelled.value} />
+              ))}
               <Review label={t.staff.date} value={slot ? `${bangkokDateParts(new Date(slot.starts_at)).isoDate} ${formatTime(slot.starts_at)}–${formatTime(slot.ends_at)}` : ""} />
               {guidance ? (
                 <div className="pt-2">

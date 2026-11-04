@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BookingWizard } from "@/components/booking/booking-wizard";
@@ -106,10 +106,13 @@ describe("wizard navigation", () => {
     await user.click(screen.getByRole("button", { name: "Continue" }));
     await user.click(screen.getByRole("radio", { name: /Renewal — car/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    expect(screen.getByLabelText(/Current expiry date/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Please complete the following." })).toBeInTheDocument();
+    expect(screen.getByLabelText("Day")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Lost driving license." })).toBeInTheDocument();
     expect(screen.queryByLabelText(/Country that issued the existing licence/)).not.toBeInTheDocument();
-    await user.selectOptions(screen.getByLabelText(/Current licence type/), "temporary");
-    fireEvent.change(screen.getByLabelText(/Current expiry date/), { target: { value: "2099-01-01" } });
+    await user.selectOptions(screen.getByLabelText("Day"), "01");
+    await user.selectOptions(screen.getByLabelText("Month"), "06");
+    await user.selectOptions(screen.getByLabelText("Year"), "2028");
     await user.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getAllByText(/outside the configured demonstration window/).length).toBeGreaterThan(0);
     await user.click(screen.getByRole("button", { name: "Previous" }));
@@ -119,7 +122,7 @@ describe("wizard navigation", () => {
     await user.click(screen.getByRole("radio", { name: /Convert a foreign licence/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByLabelText(/Country that issued the existing licence/)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Current expiry date/)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Day")).not.toBeInTheDocument();
   });
 
   it("hides the permit category at an office that is not eligible", async () => {

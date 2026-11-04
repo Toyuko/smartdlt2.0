@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { RenewalLicenceForm } from "@/components/booking/renewal-licence-form";
 import { errorText, SetupRequired, useI18n } from "@/components/language";
 import { Button, Field, Panel, inputClass } from "@/components/ui";
 import {
@@ -16,6 +17,7 @@ import {
   visibleFields,
   type BookingCategory,
 } from "@/lib/booking/categories";
+import { renewalVehicles } from "@/lib/booking/renewal-form";
 import { bookingRequestSchema, fieldErrorsFromZod, type BookingRequest } from "@/lib/booking/validation";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import type { CatalogOffice, CatalogService, CatalogVehicle } from "@/lib/data/store";
@@ -409,7 +411,9 @@ export function QuickSignup() {
               </select>
             </Field>
           ) : null}
-          {fields.length ? (
+          {renewalVehicles(service?.slug ?? "").length ? (
+            <RenewalLicenceForm serviceSlug={service?.slug ?? ""} answers={answers} errors={fieldErrors} onChange={setAnswers} />
+          ) : fields.length ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {renewalHint ? <p className="text-sm leading-6 text-muted sm:col-span-2">{renewalHint}</p> : null}
               {fields.map((field) => (

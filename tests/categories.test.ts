@@ -167,6 +167,22 @@ describe("booking categories", () => {
     expect(blocked.ok).toBe(false);
     expect(blocked.fieldErrors.expiryDate).toBe("renewal_window");
     expect(blocked.answers).not.toHaveProperty("issuingCountry");
+    const both = selection({
+      ...baseSelection(renewal, {
+        motorcycleDay: "01",
+        motorcycleMonth: "11",
+        motorcycleYear: "2026",
+        motorcycleLost: "no",
+        carDay: "01",
+        carMonth: "06",
+        carYear: "2028",
+      }),
+      serviceSlug: "renewal-car-motorcycle",
+    });
+    expect(both.ok).toBe(false);
+    expect(both.fieldErrors.carDay).toBe("renewal_window");
+    expect(both.answers.motorcycleExpiryDate).toBe("2026-11-01");
+    expect(both.answers.currentLicenceType).toBe("five_year");
   });
 
   it("rejects an office that is not eligible for the category", () => {

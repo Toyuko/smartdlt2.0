@@ -1,4 +1,5 @@
 import { officeSeed } from "@/lib/demo-catalog";
+import { normalizeRenewalAnswers, renewalCardDates, renewalStoredKeys, renewalVehicles, usesRenewalCards } from "@/lib/booking/renewal-form";
 import { bangkokDateParts, shiftIsoDate } from "@/lib/time";
 
 export type FieldOption = {
@@ -578,6 +579,9 @@ export function visibleFields(category: BookingCategory | undefined, serviceSlug
 
 export function applicableAnswers(category: BookingCategory | undefined, serviceSlug: string, answers: Record<string, string>) {
   const allowed = new Set(visibleFields(category, serviceSlug).map((field) => field.key));
+  if (category?.slug === "thai-renewal") {
+    for (const key of renewalStoredKeys(serviceSlug)) allowed.add(key);
+  }
   const next: Record<string, string> = {};
   for (const [key, value] of Object.entries(answers)) {
     const trimmed = value.trim();
@@ -735,15 +739,27 @@ export function selectDocumentSet(category: BookingCategory, context: GuidanceCo
 }
 
 export function evaluateRenewal(category: BookingCategory, answers: Record<string, string>, today: string) {
-  if (!category.slotRules.renewal) return { state: "not_applicable" as const };
+  if (!category.slotRules.renewal) return { state: "not_applicable" as const, vehicle: "" };
+  const cards = renewalCardDates(answers);
+  if (cards.length) {
+    const licenceType = answers.currentLicenceType || "five_year";
+    const window = category.slotRules.renewal[licenceType];
+    if (!window) return { state: "missing" as const, vehicle: cards[0]?.vehicle ?? "" };
+    for (const card of cards) {
+      if (!isIsoDate(card.iso)) return { state: card.iso ? "invalid_date" as const : "missing" as const, vehicle: card.vehicle };
+      const days = daysBetween(today, card.iso);
+      if (days > window.maxDaysBeforeExpiry || days < -window.maxDaysAfterExpiry) return { state: "outside" as const, vehicle: card.vehicle };
+    }
+    return { state: "ok" as const, vehicle: "" };
+  }
   const licenceType = answers.currentLicenceType ?? "";
   const window = category.slotRules.renewal[licenceType];
-  if (!licenceType || !window) return { state: "missing" as const };
+  if (!licenceType || !window) return { state: "missing" as const, vehicle: "" };
   const expiry = answers.expiryDate ?? "";
-  if (!isIsoDate(expiry)) return { state: "invalid_date" as const };
+  if (!isIsoDate(expiry)) return { state: "invalid_date" as const, vehicle: "" };
   const days = daysBetween(today, expiry);
-  if (days > window.maxDaysBeforeExpiry || days < -window.maxDaysAfterExpiry) return { state: "outside" as const };
-  return { state: "ok" as const };
+  if (days > window.maxDaysBeforeExpiry || days < -window.maxDaysAfterExpiry) return { state: "outside" as const, vehicle: "" };
+  return { state: "ok" as const, vehicle: "" };
 }
 
 export function describeRenewalRules(rules: SlotRules, locale: "en" | "th") {
@@ -782,12 +798,16 @@ export function validateSelection(input: SelectionInput) {
     }
   }
 
-  const answers = category
+  let answers = category
     ? applicableAnswers(category, input.serviceSlug, input.answers)
     : cleanLooseAnswers(input.answers, errors);
+  const cardVehicles = category?.slug === "thai-renewal" ? renewalVehicles(input.serviceSlug) : [];
+  const cardForm = usesRenewalCards(input.serviceSlug, answers);
+  if (cardForm) answers = normalizeRenewalAnswers(input.serviceSlug, answers);
 
   if (category) {
     for (const field of visibleFields(category, input.serviceSlug)) {
+      if (cardForm && (field.key === "currentLicenceType" || field.key === "expiryDate")) continue;
       const value = answers[field.key] ?? "";
       if (field.required && !value) errors[field.key] = field.kind === "date" ? "date_invalid" : "answer_required";
       if (value && field.kind === "date" && !isIsoDate(value)) errors[field.key] = "date_invalid";
@@ -797,10 +817,18 @@ export function validateSelection(input: SelectionInput) {
       }
       if (value && looksLikeGovernmentNumber(value)) errors[field.key] = "no_government_id";
     }
+    if (cardForm) {
+      for (const vehicle of cardVehicles) {
+        const iso = answers[`${vehicle}ExpiryDate`] ?? "";
+        const started = Boolean(answers[`${vehicle}Day`] || answers[`${vehicle}Month`] || answers[`${vehicle}Year`]);
+        if (!isIsoDate(iso)) errors[`${vehicle}Day`] = started ? "date_invalid" : "answer_required";
+      }
+    }
     const renewal = evaluateRenewal(category, answers, input.today);
-    if (renewal.state === "outside") errors.expiryDate = "renewal_window";
-    if (renewal.state === "invalid_date") errors.expiryDate = "date_invalid";
-    if (renewal.state === "missing" && !errors.currentLicenceType && !errors.expiryDate) {
+    const renewalKey = renewal.vehicle ? `${renewal.vehicle}Day` : "expiryDate";
+    if (renewal.state === "outside") errors[renewalKey] = "renewal_window";
+    if (renewal.state === "invalid_date" && !renewal.vehicle) errors.expiryDate = "date_invalid";
+    if (renewal.state === "missing" && !cardForm && !errors.currentLicenceType && !errors.expiryDate) {
       errors.currentLicenceType = "answer_required";
     }
   }
