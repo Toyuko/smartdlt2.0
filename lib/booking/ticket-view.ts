@@ -3,7 +3,7 @@ import { formatIdentityNumber } from "@/lib/booking/identity";
 import type { VerificationOutcome } from "@/lib/booking/outcomes";
 import type { PublicBooking } from "@/lib/booking/public-view";
 import { vehicleCategorySeed } from "@/lib/demo-catalog";
-import { formatAppointmentDate, formatAppointmentRange, formatBookingDate, formatSlipRound, formatSlotRange } from "@/lib/time";
+import { formatAppointmentDate, formatAppointmentRange, formatBookingDate, formatSlipDate, formatSlipRound, formatSlotRange } from "@/lib/time";
 
 export const TICKET_STATUS: Record<VerificationOutcome, string> = {
   valid: "Valid demo record — not an official DLT confirmation.",
@@ -74,6 +74,7 @@ export function presentTicket(booking: PublicBooking, locale: "en" | "th") {
   const categoryUpper = (locale === "th" ? booking.categoryLabelTh : booking.categoryLabel).toUpperCase();
   return {
     date: formatBookingDate(booking.startsAt),
+    slipDate: formatSlipDate(booking.startsAt, locale),
     round: formatSlotRange(booking.startsAt, booking.endsAt),
     slipRound: formatSlipRound(booking.startsAt, booking.endsAt),
     ticketDate: formatAppointmentDate(booking.startsAt),

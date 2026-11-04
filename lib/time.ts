@@ -90,6 +90,19 @@ export function formatBookingDate(iso: string) {
   return `${String(parts.day).padStart(2, "0")}/${String(parts.month).padStart(2, "0")}/${parts.year}`;
 }
 
+export function formatSlipDate(iso: string, locale: "en" | "th" = "en") {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  const formatted = new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-GB", {
+    timeZone: BANGKOK,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+  return formatted.replace(/,/g, "");
+}
+
 export function formatSlotRange(startsAt: string, endsAt: string) {
   const start = clock12(startsAt);
   const end = clock12(endsAt);

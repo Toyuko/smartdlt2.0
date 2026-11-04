@@ -9,7 +9,7 @@ import { AppProviders } from "@/components/language";
 import { categoryBySlug, snapshotGuidance } from "@/lib/booking/categories";
 import { createDemoBooking, type BookingWriter } from "@/lib/booking/create-booking";
 import { DATABASE_RETRY_TH, TICKET_STATUS_TH } from "@/lib/booking/ticket-view";
-import { formatBookingDate, formatSlotRange } from "@/lib/time";
+import { formatSlotRange } from "@/lib/time";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import type { PublicBooking } from "@/lib/booking/public-view";
 
@@ -75,19 +75,17 @@ function renderConfirmation(current: PublicBooking = booking) {
 describe("booking confirmation and electronic ticket", () => {
   it("shows the saved appointment, office, and demo-ticket QR", async () => {
     renderConfirmation();
-    expect(formatBookingDate(startsAt)).toBe("29/10/2026");
     expect(formatSlotRange(startsAt, endsAt)).toBe("08:00–09:00 AM");
     expect(screen.getByRole("heading", { name: "Booking information" })).toBeInTheDocument();
-    expect(screen.getByText("29/10/2026")).toBeInTheDocument();
+    expect(screen.getByText("Thursday 29 October 2026")).toBeInTheDocument();
     expect(screen.getByText("08:00 - 09:00 AM")).toBeInTheDocument();
-    expect(screen.getByText("ชาวต่างชาติ")).toBeInTheDocument();
-    expect(screen.getByText("NEW THAI DRIVING LICENCE")).toBeInTheDocument();
+    expect(screen.getByText("ชาวต่างชาติ: NEW THAI DRIVING LICENCE")).toBeInTheDocument();
     expect(screen.getByText("Sample Visitor")).toBeInTheDocument();
     expect(screen.getByTestId("identity-number")).toHaveTextContent("HN755235");
     expect(screen.getAllByText("VD-TEST-BOOK").length).toBeGreaterThan(0);
     expect(screen.getByTestId("office-name")).toHaveTextContent("SmartDLT2.0 Riverside Demo Office with a long display name");
     expect(screen.getByTestId("office-name").className).toContain("break-words");
-    expect(screen.getByText("Motorcycle")).toBeInTheDocument();
+    expect(screen.queryByText("Motorcycle")).not.toBeInTheDocument();
     expect(screen.getByTestId("qr-print")).toHaveAttribute("data-qr-payload", ticketUrl);
     expect(screen.queryByText(/DEMO QR CODE/)).not.toBeInTheDocument();
     expect(screen.getByTestId("print-disclaimer")).toHaveTextContent(DEMO_NOTICE);

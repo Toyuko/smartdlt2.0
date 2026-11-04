@@ -32,72 +32,42 @@ export function ConfirmationScreen({
   }, [booking.reference, initialTicketUrl]);
 
   return (
-    <div className="confirmation-page min-h-dvh bg-[linear-gradient(180deg,#efe6ff_0%,#f7f3fc_32%,#f4f3f6_100%)] px-4 pb-24 pt-3 lg:pb-10">
+    <div className="confirmation-page min-h-dvh bg-white px-4 pb-24 pt-3 lg:pb-10">
       <div data-testid="confirmation-layout" className="mx-auto w-full max-w-md overflow-x-hidden lg:max-w-xl">
         <p className="print-disclaimer slip-legal" data-testid="print-disclaimer">
           {DEMO_NOTICE}
         </p>
-        <div className="relative flex h-10 items-center justify-center">
-          <Link href="/" aria-label={t.confirm.back} className="absolute left-0 grid h-11 w-11 place-items-center text-[#2c2144]">
+        <div className="relative flex h-10 items-center">
+          <Link href="/" aria-label={t.confirm.back} className="grid h-11 w-11 place-items-center text-[#2c2144]">
             <Chevron />
           </Link>
-          <h1 className="text-lg font-bold text-[#2c2144]">{t.confirm.pageTitle}</h1>
         </div>
 
-        <section className="mt-2 rounded-2xl bg-white px-3 py-3 shadow-[0_8px_24px_rgba(90,50,150,0.06)]" aria-label={t.confirm.pageTitle}>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="min-w-0">
-              <p className="text-[11px] text-[#9a9aa6]">{t.confirm.bookingDate}</p>
-              <p className="mt-2 break-words text-sm font-bold text-[#6d3cc8]">{view.date}</p>
+        <section className="print-card overflow-hidden rounded-2xl bg-white shadow-[0_10px_28px_rgba(40,20,80,0.08)]">
+          <h1 className="bg-[#6d28d9] px-5 py-4 text-[22px] font-bold leading-tight text-white">{t.confirm.pageTitle}</h1>
+          <div className="px-5 pb-6 pt-5">
+            <div className="grid grid-cols-2 gap-x-6 border-b border-[#ececf2] pb-4">
+              <Info label={t.confirm.slipName} value={view.name} tone="ink" />
+              <Info label={t.confirm.idNo} value={view.identityNumber || "—"} testId="identity-number" />
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] text-[#9a9aa6]">{t.confirm.pageTitle}</p>
-              {view.applicantShort ? <p className="mt-2 break-words text-sm font-bold leading-5 text-[#6d3cc8]">{view.applicantShort}</p> : null}
-              <p className="mt-1 break-words text-[11px] font-bold uppercase leading-4 text-[#6d3cc8]">{view.categoryUpper}</p>
+            <div className="grid grid-cols-2 gap-x-6 pt-4">
+              <Info label={t.confirm.bookingDate} value={view.slipDate} />
+              <Info label={t.confirm.round} value={view.slipRound} />
             </div>
-            <div className="min-w-0">
-              <p className="text-[11px] text-[#9a9aa6]">{t.confirm.round}</p>
-              <p className="mt-2 break-words text-sm font-bold leading-5 text-[#6d3cc8]">{view.slipRound}</p>
+            <div className="mt-6">
+              <Info label={t.confirm.type} value={view.bookingType} />
+            </div>
+            <div className="mt-6">
+              <Info label={t.confirm.office} value={view.office} testId="office-name" />
             </div>
           </div>
         </section>
 
-        <section className="mt-3 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(90,50,150,0.06)]" aria-label={t.confirm.slipName}>
-          <div className="grid grid-cols-2 gap-3 text-center">
-            <div className="min-w-0">
-              <p className="text-xs text-[#9a9aa6]">{t.confirm.slipName}</p>
-              <p className="mt-2 break-words text-base font-bold text-[#222]">{view.name}</p>
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs text-[#9a9aa6]">{t.confirm.idNo}</p>
-              <p data-testid="identity-number" className="mt-2 break-all text-[13px] font-bold tracking-tight text-[#6d3cc8]">
-                {view.identityNumber || "—"}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <div className="mt-3 px-3 text-center">
-          <p className="text-sm text-[#8e8e98]">{t.staff.office}</p>
-          <p data-testid="office-name" className="mt-1 break-words text-base font-bold leading-6 text-[#6d3cc8]">
-            {view.office}
-          </p>
-        </div>
-        {view.vehicle ? (
-          <div className="mt-3 px-3 text-center">
-            <p className="text-sm text-[#8e8e98]">{t.confirm.slipVehicle}</p>
-            <p className="mt-1 text-base font-bold text-[#6d3cc8]">{view.vehicle}</p>
-          </div>
-        ) : null}
-
-        <section className="qr-print mt-3 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(90,50,150,0.06)]">
-          <h2 className="text-center text-base font-semibold text-[#2a2a2a]">{t.confirm.saveImage}</h2>
-          {ticketUrl ? (
+        {ticketUrl ? (
+          <section className="qr-print mt-3 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(90,50,150,0.06)]">
             <QrCard verificationUrl={ticketUrl} reference={booking.reference} layout="slip" />
-          ) : (
-            <p className="mt-3 text-center text-sm leading-6 text-muted">{t.confirm.qrOnce}</p>
-          )}
-        </section>
+          </section>
+        ) : null}
 
         <button
           type="button"
@@ -150,6 +120,27 @@ function SlipNav({ reference }: { reference: string }) {
         ))}
       </div>
     </nav>
+  );
+}
+
+function Info({
+  label,
+  value,
+  tone = "brand",
+  testId,
+}: {
+  label: string;
+  value: string;
+  tone?: "ink" | "brand";
+  testId?: string;
+}) {
+  return (
+    <div className="min-w-0 text-left">
+      <p className="text-sm text-[#a09aaa]">{label}</p>
+      <p data-testid={testId} className={`mt-1.5 break-words text-[15px] font-bold leading-6 ${tone === "ink" ? "text-[#1a1a1a]" : "text-[#3d188c]"}`}>
+        {value}
+      </p>
+    </div>
   );
 }
 
