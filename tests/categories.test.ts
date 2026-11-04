@@ -170,14 +170,14 @@ describe("booking categories", () => {
       vehicleCategory: "car",
     });
     expect(coastal.fieldErrors.officeId).toBe("office_ineligible");
-    const canal = selection({
+    const riverside = selection({
       ...baseSelection(permit, {}),
-      officeSlug: "canal",
+      officeSlug: "riverside",
       serviceSlug: "idp",
       requiresVehicle: true,
       vehicleCategory: "car",
     });
-    expect(canal.ok).toBe(true);
+    expect(riverside.ok).toBe(true);
   });
 
   it("builds a shorter wizard when vehicle and extra questions are not required", () => {
@@ -200,7 +200,7 @@ describe("booking categories", () => {
     const writer: BookingWriter = {
       consumeRateLimit: async () => true,
       loadContext: async () => ({
-        officeSlug: "canal",
+        officeSlug: "bkk-area-1",
         officeActive: true,
         serviceSlug: "renewal-car",
         serviceActive: true,
@@ -238,7 +238,7 @@ describe("booking categories", () => {
 
 function baseSelection(item: BookingCategory, answers: Record<string, string>): Parameters<typeof validateSelection>[0] {
   return {
-    officeSlug: "canal",
+    officeSlug: "bkk-area-1",
     officeActive: true,
     serviceSlug: "renewal-car",
     serviceActive: true,

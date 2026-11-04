@@ -23,14 +23,6 @@ export const officeSeed = [
     demo_label: "Demo location — not an official DLT office",
   },
   {
-    slug: "canal",
-    name: "SmartDLT2.0 Canal Demo",
-    name_th: "SmartDLT2.0 สาขาสาธิตคลอง",
-    province: "Bangkok",
-    province_th: "กรุงเทพมหานคร",
-    demo_label: "Demo location — not an official DLT office",
-  },
-  {
     slug: "coastal",
     name: "SmartDLT2.0 Coastal Demo",
     name_th: "SmartDLT2.0 สาขาสาธิตชายฝั่ง",

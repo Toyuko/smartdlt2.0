@@ -475,7 +475,7 @@ export const bookingCategorySeed: BookingCategory[] = [
     active: true,
     sortOrder: 5,
     vehicleSlugs: ["car", "motorcycle"],
-    eligibleOfficeSlugs: ["riverside", "canal"],
+    eligibleOfficeSlugs: ["riverside"],
     slotRules: baseRules,
     conditionalFields: [],
     documentSets: [

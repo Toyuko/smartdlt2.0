@@ -17,9 +17,9 @@ const catalog = {
   offices: [
     {
       id: officeId,
-      slug: "canal",
-      name: "SmartDLT2.0 Canal Demo",
-      nameTh: "SmartDLT2.0 สาขาสาธิตคลอง",
+      slug: "bkk-area-1",
+      name: "Bangkok Transport Office Area 1 (Bang Khun Thian)",
+      nameTh: "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 1 (บางขุนเทียน)",
       province: "Bangkok",
       provinceTh: "กรุงเทพมหานคร",
       demoLabel: "Demo location — not an official DLT office",
@@ -77,10 +77,10 @@ describe("wizard navigation", () => {
     await user.click(screen.getByRole("radio", { name: /Thai applicant/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByRole("heading", { name: "Bangkok" })).toBeInTheDocument();
-    await user.click(screen.getByRole("radio", { name: /Canal Demo/ }));
+    await user.click(screen.getByRole("radio", { name: /Area 1/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByRole("radio", { name: /New Thai Driving Licence/ })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /International Driving Permit/ })).toBeInTheDocument();
+    expect(screen.queryByRole("radio", { name: /International Driving Permit/ })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "✓Applicant" }));
     expect(screen.getByRole("radio", { name: /Thai applicant/ })).toBeChecked();
   });
@@ -100,7 +100,7 @@ describe("wizard navigation", () => {
     await screen.findByTestId("wizard-compact-progress");
     await user.click(screen.getByRole("radio", { name: /Thai applicant/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    await user.click(screen.getByRole("radio", { name: /Canal Demo/ }));
+    await user.click(screen.getByRole("radio", { name: /Area 1/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
     await user.click(screen.getByRole("radio", { name: /Thai Driving Licence Renewal/ }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
