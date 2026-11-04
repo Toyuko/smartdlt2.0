@@ -31,7 +31,7 @@ import { bookingRequestSchema, type BookingRequest } from "@/lib/booking/validat
 import { renewalReviewEntries, renewalVehicles } from "@/lib/booking/renewal-form";
 import { serviceChoiceDetail } from "@/lib/demo-catalog";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
-import { bangkokDateParts, formatTime, shiftIsoDate } from "@/lib/time";
+import { bangkokDateParts, formatVisitRange, shiftIsoDate } from "@/lib/time";
 import type { CatalogOffice, CatalogService, CatalogVehicle } from "@/lib/data/store";
 
 type Catalog = {
@@ -597,14 +597,14 @@ export function BookingWizard() {
                           }}
                           className={`rounded-2xl border px-4 py-3 text-left text-sm font-semibold disabled:opacity-50 ${values.timeSlotId === item.id ? "border-brand bg-brand-soft" : "border-line"}`}
                         >
-                          {formatTime(item.starts_at)}–{formatTime(item.ends_at)} · {closed ? t.book.full : `${item.remaining} ${t.book.seats}`}
+                          {formatVisitRange(item.starts_at, item.ends_at)} · {closed ? t.book.full : `${item.remaining} ${t.book.seats}`}
                         </button>
                       );
                     })}
                   </div>
                   {slot ? (
                     <p className="mt-4 text-sm font-semibold" data-testid="selected-slot">
-                      {t.book.selectedSlot}: {bangkokDateParts(new Date(slot.starts_at)).isoDate} {formatTime(slot.starts_at)}–{formatTime(slot.ends_at)}
+                      {t.book.selectedSlot}: {bangkokDateParts(new Date(slot.starts_at)).isoDate} {formatVisitRange(slot.starts_at, slot.ends_at)}
                     </p>
                   ) : null}
                   {form.formState.errors.timeSlotId ? <p role="alert" className="mt-2 text-sm text-full">{errorText(t.errors, form.formState.errors.timeSlotId.message)}</p> : null}
@@ -625,7 +625,7 @@ export function BookingWizard() {
               ).map((labelled) => (
                 <Review key={`${labelled.label}-${labelled.value}`} label={labelled.label} value={labelled.value} />
               ))}
-              <Review label={t.staff.date} value={slot ? `${bangkokDateParts(new Date(slot.starts_at)).isoDate} ${formatTime(slot.starts_at)}–${formatTime(slot.ends_at)}` : ""} />
+              <Review label={t.staff.date} value={slot ? `${bangkokDateParts(new Date(slot.starts_at)).isoDate} ${formatVisitRange(slot.starts_at, slot.ends_at)}` : ""} />
               {guidance ? (
                 <div className="pt-2">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted">{t.confirm.guidance}</p>

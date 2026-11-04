@@ -13,7 +13,7 @@ import { parseScanPayload } from "@/lib/booking/codes";
 import type { VerificationOutcome } from "@/lib/booking/outcomes";
 import type { PublicBooking } from "@/lib/booking/public-view";
 import { isPublicConfigured } from "@/lib/public-env";
-import { formatLongDate, formatTime } from "@/lib/time";
+import { formatLongDate, formatTime, formatVisitRange } from "@/lib/time";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { AuditEntry, StaffBooking } from "@/lib/data/store";
 
@@ -328,7 +328,7 @@ export function BookingDetail({ id }: { id: string }) {
         <Info label={t.staff.office} value={locale === "th" ? booking.officeNameTh : booking.officeName} />
         <Info label={t.staff.category} value={locale === "th" ? booking.categoryLabelTh : booking.categoryLabel} />
         <Info label={t.staff.service} value={locale === "th" ? booking.serviceNameTh : booking.serviceName} />
-        <Info label={t.staff.date} value={`${formatLongDate(booking.startsAt, locale)} ${formatTime(booking.startsAt)}–${formatTime(booking.endsAt)}`} />
+        <Info label={t.staff.date} value={`${formatLongDate(booking.startsAt, locale)} ${formatVisitRange(booking.startsAt, booking.endsAt)}`} />
         {(renewalReviewEntries(booking.answers, locale) ??
           Object.entries(booking.answers).map(([key, value]) => ({
             key,

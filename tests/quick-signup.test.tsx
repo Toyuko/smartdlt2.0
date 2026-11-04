@@ -3,7 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QuickSignup } from "@/components/staff/quick-signup";
-import { formatBookingDate, formatTime } from "@/lib/time";
+import { formatBookingDate, formatVisitRange } from "@/lib/time";
 
 const officeId = "11111111-1111-4111-8111-111111111111";
 const serviceId = "22222222-2222-4222-8222-222222222222";
@@ -79,7 +79,7 @@ describe("staff quick signup", () => {
 
     render(<QuickSignup />);
 
-    const slotText = `${formatBookingDate(startsAt)} ${formatTime(startsAt)}`;
+    const slotText = `${formatBookingDate(startsAt)} ${formatVisitRange(startsAt, endsAt)}`;
     expect(await screen.findByRole("option", { name: new RegExp(slotText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) })).toBeInTheDocument();
     await user.type(screen.getByRole("textbox", { name: "Display name" }), "Sample Visitor");
     await user.click(screen.getByRole("checkbox", { name: /demonstration booking/ }));

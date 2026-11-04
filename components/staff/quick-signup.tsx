@@ -21,7 +21,7 @@ import { renewalVehicles } from "@/lib/booking/renewal-form";
 import { bookingRequestSchema, fieldErrorsFromZod, type BookingRequest } from "@/lib/booking/validation";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import type { CatalogOffice, CatalogService, CatalogVehicle } from "@/lib/data/store";
-import { bangkokDateParts, formatBookingDate, formatTime, shiftIsoDate } from "@/lib/time";
+import { bangkokDateParts, formatBookingDate, formatTime, formatVisitRange, shiftIsoDate } from "@/lib/time";
 
 type Catalog = {
   offices: CatalogOffice[];
@@ -326,7 +326,7 @@ export function QuickSignup() {
   if (loadError || !catalog) return <p role="alert">{errorText(t.errors, loadError || "catalog_unavailable")}</p>;
 
   const slotLabel = (slot: Slot) =>
-    `${formatBookingDate(slot.starts_at)} ${formatTime(slot.starts_at)}–${formatTime(slot.ends_at)} · ${slot.remaining} ${t.book.seats}`;
+    `${formatBookingDate(slot.starts_at)} ${formatVisitRange(slot.starts_at, slot.ends_at)} · ${slot.remaining} ${t.book.seats}`;
 
   return (
     <div className="space-y-4" data-testid="staff-quick-signup">

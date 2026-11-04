@@ -67,6 +67,22 @@ export function formatTime(iso: string) {
   }).format(new Date(iso));
 }
 
+export function formatVisitTime(iso: string) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  const parts = bangkokDateParts(date);
+  const suffix = parts.hour >= 12 ? "pm" : "am";
+  const hour12 = parts.hour % 12 === 0 ? 12 : parts.hour % 12;
+  return `${hour12}:${String(parts.minute).padStart(2, "0")}${suffix}`;
+}
+
+export function formatVisitRange(startsAt: string, endsAt: string) {
+  const start = formatVisitTime(startsAt);
+  const end = formatVisitTime(endsAt);
+  if (start === "—" || end === "—") return "—";
+  return `${start} to ${end}`;
+}
+
 export function formatBookingDate(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";

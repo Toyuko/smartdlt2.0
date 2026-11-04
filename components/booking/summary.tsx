@@ -4,7 +4,7 @@ import { useI18n } from "@/components/language";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import type { VerificationOutcome } from "@/lib/booking/outcomes";
 import type { PublicBooking } from "@/lib/booking/public-view";
-import { formatLongDate, formatTime } from "@/lib/time";
+import { formatLongDate, formatVisitRange } from "@/lib/time";
 
 export function BookingSummary({ booking, outcome }: { booking: PublicBooking | null; outcome: VerificationOutcome }) {
   const { locale, t } = useI18n();
@@ -41,7 +41,7 @@ export function BookingSummary({ booking, outcome }: { booking: PublicBooking | 
           <div>
             <dt className="text-muted">{t.staff.date}</dt>
             <dd className="font-semibold">
-              {formatLongDate(booking.startsAt, locale)} · {formatTime(booking.startsAt)}–{formatTime(booking.endsAt)}
+              {formatLongDate(booking.startsAt, locale)} · {formatVisitRange(booking.startsAt, booking.endsAt)}
             </dd>
           </div>
         </dl>
