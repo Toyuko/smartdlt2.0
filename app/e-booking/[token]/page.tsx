@@ -16,15 +16,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function DemoTicketPage({ params }: { params: Promise<{ token: string }> }) {
+export default function EBookingPage({ params }: { params: Promise<{ token: string }> }) {
   return (
     <Suspense fallback={<p lang="th" className="px-4 py-8 text-sm text-muted">กำลังโหลดใบนัด…</p>}>
-      <DemoTicketLoader params={params} />
+      <EBookingLoader params={params} />
     </Suspense>
   );
 }
 
-async function DemoTicketLoader({ params }: { params: Promise<{ token: string }> }) {
+async function EBookingLoader({ params }: { params: Promise<{ token: string }> }) {
   await connection();
   const { token } = await params;
   const origin = resolveTicketOrigin(await headers());

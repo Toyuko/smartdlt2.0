@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: "/demo-ticket/:token", destination: "/e-booking/:token", permanent: true },
+      { source: "/v/:token", destination: "/e-booking/:token", permanent: true },
+    ];
+  },
   cacheComponents: true,
   partialPrefetching: true,
   allowedDevOrigins: ["127.0.0.1"],

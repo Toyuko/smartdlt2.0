@@ -56,7 +56,7 @@ Keep `STAFF_PASSWORD` and `SUPABASE_SERVICE_ROLE_KEY` in the environment only. T
 
 ## Verification behaviour
 
-A QR code contains only `{APP_BASE_URL}/demo-ticket/{opaque-token}`. Set `APP_BASE_URL` to the public origin of the deployment that should open when the code is scanned. The database stores the SHA-256 hash of that token. The raw token is returned once, when the booking is created, and is not written to the database. Opening the QR loads `/demo-ticket/{token}` from the database. `/booking-confirmation/{reference}` shows the same saved booking. Lookup by reference still shows the public summary.
+A QR code contains only `{APP_BASE_URL}/e-booking/{opaque-token}`. Set `APP_BASE_URL` to the public origin of the deployment that should open when the code is scanned. The database stores the SHA-256 hash of that token. The raw token is returned once, when the booking is created, and is not written to the database. Opening the QR loads `/e-booking/{token}` from the database. Older `/demo-ticket/{token}` and `/v/{token}` links redirect there. `/booking-confirmation/{reference}` shows the same saved booking. Lookup by reference still shows the public summary.
 
 Apply `supabase/migrations/20261022013000_booking_ticket_guidance.sql` with the earlier migrations before using the new ticket pages. It adds `bookings.document_guidance` and extends `reserve_demo_booking`. The service-role key stays on the server.
 

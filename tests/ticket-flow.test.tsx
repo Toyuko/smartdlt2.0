@@ -23,7 +23,7 @@ vi.mock("qrcode", () => ({
   },
 }));
 
-const ticketUrl = "https://demo.example/demo-ticket/abcdefghijklmnopqrstuvwxyz0123456789AB";
+const ticketUrl = "https://demo.example/e-booking/abcdefghijklmnopqrstuvwxyz0123456789AB";
 const startsAt = "2026-10-29T01:00:00.000Z";
 const endsAt = "2026-10-29T02:00:00.000Z";
 
@@ -235,7 +235,7 @@ describe("booking confirmation and electronic ticket", () => {
 
   it("verifies the ticket on the server with a token hash", () => {
     const source = readFileSync("lib/booking/ticket.ts", "utf8");
-    const page = readFileSync("app/demo-ticket/[token]/page.tsx", "utf8");
+    const page = readFileSync("app/e-booking/[token]/page.tsx", "utf8");
     const transition = readFileSync("app/api/staff/bookings/[id]/transition/route.ts", "utf8");
     expect(source).toContain("hashToken");
     expect(source).toContain("getPublicByTokenHash");
@@ -290,7 +290,7 @@ describe("booking confirmation and electronic ticket", () => {
       { keyHash: "ip", origin: "https://demo.example" },
     );
     expect(result.reference).toBe("VD-TEST-BOOK");
-    expect(result.verificationUrl).toMatch(/^https:\/\/demo\.example\/demo-ticket\/[^/?#]+$/);
+    expect(result.verificationUrl).toMatch(/^https:\/\/demo\.example\/e-booking\/[^/?#]+$/);
     expect(saved).toEqual({ id: "conversion-translation", dressCode: null });
   });
 });

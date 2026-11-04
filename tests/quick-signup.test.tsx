@@ -71,7 +71,7 @@ describe("staff quick signup", () => {
         }
         if (url === "/api/bookings" && init?.method === "POST") {
           posted.push(JSON.parse(String(init.body)));
-          return json({ reference: "VD-TEST-BOOK", verificationUrl: "https://demo.example/demo-ticket/opaque-token" }, 201);
+          return json({ reference: "VD-TEST-BOOK", verificationUrl: "https://demo.example/e-booking/opaque-token" }, 201);
         }
         return json({ error: "not_found" }, 404);
       }),
@@ -99,6 +99,6 @@ describe("staff quick signup", () => {
       acceptDisclaimer: true,
       categorySlug: "new-thai-licence",
     });
-    expect(window.sessionStorage.getItem("vd-verify-url:VD-TEST-BOOK")).toBe("https://demo.example/demo-ticket/opaque-token");
+    expect(window.sessionStorage.getItem("vd-verify-url:VD-TEST-BOOK")).toBe("https://demo.example/e-booking/opaque-token");
   });
 });

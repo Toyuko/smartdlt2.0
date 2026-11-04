@@ -23,8 +23,8 @@ Browser wizard
     -> rate limit
     -> reserve_demo_booking()  (row lock + capacity check + insert)
   -> /booking-confirmation/{reference}
-    -> QR encodes only {APP_ORIGIN}/demo-ticket/{opaque-token}
-    -> scanning opens /demo-ticket/{opaque-token} and loads that row by token hash
+    -> QR encodes only {APP_ORIGIN}/e-booking/{opaque-token}
+    -> scanning opens /e-booking/{opaque-token} and loads that row by token hash
 
 Staff browser
   -> Supabase Auth session cookie
@@ -47,7 +47,7 @@ Token and reference checks return one of: valid demo booking, already checked in
 
 ## What the QR may contain
 
-The QR payload is a URL on this application's origin whose path is `/demo-ticket/` plus the opaque token. It has no query string and no applicant name, email, phone, notes, or document numbers. Older `/v/{token}` links redirect to that ticket. The confirmation page is `/booking-confirmation/{reference}`. Staff status changes stay on `transition_booking`.
+The QR payload is a URL on this application's origin whose path is `/e-booking/` plus the opaque token. It has no query string and no applicant name, email, phone, notes, or document numbers. Older `/demo-ticket/{token}` and `/v/{token}` links redirect to that ticket. The confirmation page is `/booking-confirmation/{reference}`. Staff status changes stay on `transition_booking`.
 
 ## Row Level Security
 
@@ -59,7 +59,7 @@ Anon and authenticated clients may read active offices, services, vehicle catego
 | --- | --- |
 | UI and wizard | `components/`, `app/(public pages)`, `lib/i18n/` |
 | Database and security | `supabase/migrations/`, `lib/data/`, `lib/booking/create-booking.ts`, `scripts/seed.ts`, `scripts/reset-demo.ts` |
-| QR and staff | `lib/booking/ticket.ts`, `lib/booking/tokens.ts`, `app/demo-ticket/`, `app/booking-confirmation/`, `app/staff/`, `app/api/staff/` |
+| QR and staff | `lib/booking/ticket.ts`, `lib/booking/tokens.ts`, `app/e-booking/`, `app/booking-confirmation/`, `app/staff/`, `app/api/staff/` |
 | QA | `tests/`, `e2e/`, `scripts/smoke-preview.ts` |
 
 ## Environment

@@ -2,6 +2,6 @@ import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: "*", disallow: ["/staff", "/v/", "/demo-ticket/", "/booking-confirmation/", "/api/"] }],
+    rules: [{ userAgent: "*", disallow: ["/staff", "/v/", "/e-booking/", "/demo-ticket/", "/booking-confirmation/", "/api/"] }],
   };
 }

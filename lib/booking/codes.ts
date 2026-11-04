@@ -10,9 +10,11 @@ export function isTicketToken(value: string) {
   return TOKEN_PATTERN.test(value);
 }
 
+export const TICKET_PATH = "e-booking";
+
 export function buildVerificationUrl(origin: string, token: string) {
   const base = origin.endsWith("/") ? origin : `${origin}/`;
-  const url = new URL(`demo-ticket/${encodeURIComponent(token)}`, base);
+  const url = new URL(`${TICKET_PATH}/${encodeURIComponent(token)}`, base);
   url.search = "";
   url.hash = "";
   return url.toString();
@@ -53,7 +55,7 @@ export function parseScanPayload(raw: string, allowedOrigins: string[]) {
   if (!origins.has(url.origin) || url.search || url.hash) {
     return { type: "rejected" as const };
   }
-  const match = url.pathname.match(/^\/(?:demo-ticket|v)\/([^/]+)$/);
+  const match = url.pathname.match(/^\/(?:e-booking|demo-ticket|v)\/([^/]+)$/);
   if (!match?.[1]) return { type: "rejected" as const };
   const token = decodeURIComponent(match[1]);
   if (token.length < 20 || token.length > 128) return { type: "rejected" as const };

@@ -103,7 +103,7 @@ describe("demo booking rules", () => {
 
   it("puts only an opaque verification URL in the QR payload", async () => {
     const result = await createDemoBooking(writer(), request, { keyHash: "ip", origin: "https://demo.example" });
-    expect(result.verificationUrl).toMatch(/^https:\/\/demo\.example\/demo-ticket\/[^/?#]+$/);
+    expect(result.verificationUrl).toMatch(/^https:\/\/demo\.example\/e-booking\/[^/?#]+$/);
     expect(result.verificationUrl).not.toContain("visitor@example.com");
     expect(result.verificationUrl).not.toContain("Sample");
     expect(result.verificationUrl).not.toContain("1103700123458");
@@ -179,7 +179,9 @@ describe("demo booking rules", () => {
     const token = "a".repeat(32);
     const url = buildVerificationUrl("https://demo.example", token);
     expect(parseScanPayload(url, ["https://demo.example"])).toEqual({ type: "token", token });
+    expect(parseScanPayload(`https://demo.example/demo-ticket/${token}`, ["https://demo.example"])).toEqual({ type: "token", token });
     expect(parseScanPayload(`https://demo.example/v/${token}`, ["https://demo.example"])).toEqual({ type: "token", token });
+    expect(parseScanPayload("https://evil.example/e-booking/" + token, ["https://demo.example"]).type).toBe("rejected");
     expect(parseScanPayload("https://evil.example/demo-ticket/" + token, ["https://demo.example"]).type).toBe("rejected");
     expect(parseScanPayload("https://evil.example/v/" + token, ["https://demo.example"]).type).toBe("rejected");
     expect(parseScanPayload("VD-SAMP-CONF", ["https://demo.example"])).toEqual({ type: "reference", reference: "VD-SAMP-CONF" });

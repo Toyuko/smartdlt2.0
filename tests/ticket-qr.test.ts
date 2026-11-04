@@ -12,8 +12,8 @@ describe("demo ticket QR image", () => {
     expect(png.length).toBeGreaterThan(500);
     const segment = QRCode.create(url).segments[0];
     const encoded = Buffer.from(segment.data).toString("utf8");
-    expect(encoded).toContain("demo-ticket/");
+    expect(encoded).toContain("e-booking/");
     expect(encoded).toContain(token);
-    expect(url).toBe(`https://demo.example/demo-ticket/${token}`);
+    expect(url).toBe(`https://demo.example/e-booking/${token}`);
   });
 });

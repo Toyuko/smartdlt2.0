@@ -24,7 +24,7 @@ export function errorText(errors: Dictionary["errors"], code: string | undefined
 }
 
 function isImmersivePath(pathname: string) {
-  return pathname.startsWith("/booking-confirmation") || pathname.startsWith("/demo-ticket");
+  return pathname.startsWith("/booking-confirmation") || pathname.startsWith("/e-booking") || pathname.startsWith("/demo-ticket");
 }
 
 export function AppProviders({ children }: { children: ReactNode }) {
