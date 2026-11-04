@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { QuickSignup } from "@/components/staff/quick-signup";
 
@@ -7,7 +8,9 @@ export const metadata: Metadata = { title: "Quick signup" };
 export default function QuickSignupPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <QuickSignup />
+      <Suspense fallback={<p className="text-sm text-muted">Loading signup…</p>}>
+        <QuickSignup />
+      </Suspense>
     </main>
   );
 }
