@@ -140,7 +140,7 @@ describe("booking confirmation and electronic ticket", () => {
       </AppProviders>,
     );
     expect(getItem).not.toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "ใบนัดอิเล็กทรอนิกส์(E-Booking)" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "ใบนัดอิเล็กทรอนิกส์(E-Booking)" })).not.toBeInTheDocument();
     expect(screen.getByText("Sample")).toBeInTheDocument();
     expect(screen.getByText("HN755235")).toBeInTheDocument();
     expect(screen.getByText("Visitor")).toBeInTheDocument();
@@ -151,8 +151,8 @@ describe("booking confirmation and electronic ticket", () => {
     expect(screen.getByTestId("ticket-status")).toHaveTextContent(TICKET_STATUS_TH.valid);
     expect(screen.getByTestId("qr-print")).toHaveAttribute("data-qr-payload", ticketUrl);
     expect(screen.getByRole("link", { name: "กลับไปหน้ายืนยันการจอง" })).toHaveAttribute("href", "/booking-confirmation/VD-TEST-BOOK");
-    expect(screen.getByTestId("ticket-guidance")).toHaveTextContent("รายการตัวอย่าง — ผู้ขอต่างชาติ");
-    expect(screen.getByTestId("ticket-guidance")).not.toHaveTextContent("Sample checklist");
+    expect(screen.queryByTestId("ticket-guidance")).not.toBeInTheDocument();
+    expect(screen.queryByText("คำแนะนำ")).not.toBeInTheDocument();
     expect(screen.getByTestId("ticket-sheet").className).toContain("max-w-lg");
     expect(screen.queryByRole("button", { name: "Check in" })).not.toBeInTheDocument();
     expect(screen.queryByTestId("staff-demo-actions")).not.toBeInTheDocument();

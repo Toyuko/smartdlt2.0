@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { BilingualGuidance } from "@/components/booking/document-guidance";
 import { QrCard } from "@/components/booking/qr-card";
 import { StaffDemoActions } from "@/components/booking/staff-demo-actions";
 import type { BookingStatus, VerificationOutcome } from "@/lib/booking/outcomes";
@@ -10,7 +9,6 @@ import { th } from "@/lib/i18n/dictionary";
 import type { PublicBooking } from "@/lib/booking/public-view";
 
 const SHEET = {
-  title: "ใบนัดอิเล็กทรอนิกส์(E-Booking)",
   personal: "ข้อมูลส่วนตัว",
   citizenId: "เลขประจำตัวประชาชน / หนังสือเดินทาง",
   firstName: "ชื่อ",
@@ -72,8 +70,6 @@ export function ElectronicTicket({
         <p className="print-disclaimer slip-legal" data-testid="print-disclaimer">
           {DEMO_NOTICE_TH}
         </p>
-        <Seal />
-        <h1 className="mt-5 text-center text-[22px] font-bold tracking-tight text-[#1c1c1c]">{SHEET.title}</h1>
         <p data-testid="ticket-status" role="status" className={outcome === "valid" ? "slip-legal" : "mx-auto mt-4 max-w-md rounded-2xl bg-brand-soft px-4 py-3 text-center text-sm font-bold leading-6 text-brand-dark"}>
           {TICKET_STATUS_TH[outcome]}
         </p>
@@ -95,10 +91,6 @@ export function ElectronicTicket({
           <Field label={SHEET.date} value={view.ticketDate} />
           <Field label={SHEET.time} value={view.ticketTime} />
         </Section>
-
-        <div className="mt-8">
-          <BilingualGuidance guidance={view.guidance} />
-        </div>
 
         <section className="qr-print mt-10">
           {ticketUrl ? <QrCard verificationUrl={ticketUrl} reference={booking.reference} imageSrc={imageSrc} layout="ticket" /> : null}
@@ -138,24 +130,5 @@ function Field({ label, value }: { label: string; value: string }) {
       <p className="text-sm text-[#8b8b96]">{label}</p>
       <p className="mt-1 break-words text-[15px] leading-6 text-[#1a1a1a]">{value}</p>
     </div>
-  );
-}
-
-function Seal() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 120 120" className="mx-auto h-28 w-28">
-      <circle cx="60" cy="60" r="58" fill="#4c1d95" />
-      <circle cx="60" cy="60" r="52" fill="none" stroke="#e7c56a" strokeWidth="2.5" />
-      <circle cx="60" cy="60" r="46" fill="#5b21b6" />
-      <circle cx="60" cy="60" r="28" fill="none" stroke="#f0d48a" strokeWidth="3" />
-      <circle cx="60" cy="60" r="8" fill="#f0d48a" />
-      {Array.from({ length: 8 }, (_, index) => {
-        const angle = (index * Math.PI) / 4;
-        const x2 = 60 + Math.cos(angle) * 22;
-        const y2 = 60 + Math.sin(angle) * 22;
-        return <line key={index} x1="60" y1="60" x2={x2} y2={y2} stroke="#f0d48a" strokeWidth="2.5" />;
-      })}
-      <circle cx="60" cy="60" r="40" fill="none" stroke="#d6b25e" strokeWidth="1" />
-    </svg>
   );
 }

@@ -47,23 +47,3 @@ export function GuidancePanel({ guidance }: { guidance: SavedGuidance }) {
     </div>
   );
 }
-
-export function BilingualGuidance({ guidance }: { guidance: SavedGuidance }) {
-  return (
-    <section data-testid="ticket-guidance">
-      <h2 className="text-[17px] font-bold text-[#1a1a1a]">คำแนะนำ</h2>
-      <p className="mt-3 text-[13px] leading-6 text-[#6d6d78]">{ticketGuidanceCopy(guidance)}</p>
-    </section>
-  );
-}
-
-function ticketGuidanceCopy(guidance: SavedGuidance) {
-  const dress = guidance.dressCode;
-  const numbered = guidance.items.map((item, index) => `${index + 1}. ${item.th}`).join(" ");
-  const dressLine = dress ? `**${dress.titleTh} - ${dress.itemsTh.join(" - ")} ***${dress.noteTh}***` : "";
-  return [dressLine, guidance.titleTh, "ต้องเตรียมเอกสารดังต่อไปนี้", numbered, "เอกสารที่ต้องใช้", numbered]
-    .filter(Boolean)
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
