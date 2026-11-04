@@ -71,6 +71,7 @@ describe("demonstration interface", () => {
       reference: "VD-TEST-BOOK",
       status: "cancelled",
       applicantDisplayName: "Sample Visitor",
+      identityNumber: "1103700123458",
       vehicleCategory: null,
       officeName: "Bangkok Transport Office Area 1 (Bang Khun Thian)",
       officeNameTh: "สำนักงานขนส่งกรุงเทพมหานครพื้นที่ 1 (บางขุนเทียน)",

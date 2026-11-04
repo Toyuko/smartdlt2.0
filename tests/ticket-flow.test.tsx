@@ -39,6 +39,7 @@ const booking: PublicBooking = {
   reference: "VD-TEST-BOOK",
   status: "confirmed",
   applicantDisplayName: "Sample Visitor",
+  identityNumber: "HN755235",
   vehicleCategory: "motorcycle",
   officeName: "SmartDLT2.0 Riverside Demo Office with a long display name",
   officeNameTh: "สำนักงานสาธิตชื่อยาว",
@@ -82,6 +83,7 @@ describe("booking confirmation and electronic ticket", () => {
     expect(screen.getByText("ชาวต่างชาติ")).toBeInTheDocument();
     expect(screen.getByText("NEW THAI DRIVING LICENCE")).toBeInTheDocument();
     expect(screen.getByText("Sample Visitor")).toBeInTheDocument();
+    expect(screen.getByTestId("identity-number")).toHaveTextContent("HN755235");
     expect(screen.getAllByText("VD-TEST-BOOK").length).toBeGreaterThan(0);
     expect(screen.getByTestId("office-name")).toHaveTextContent("SmartDLT2.0 Riverside Demo Office with a long display name");
     expect(screen.getByTestId("office-name").className).toContain("break-words");
@@ -140,6 +142,7 @@ describe("booking confirmation and electronic ticket", () => {
     expect(getItem).not.toHaveBeenCalled();
     expect(screen.getByRole("heading", { name: "ใบนัดอิเล็กทรอนิกส์(E-Booking)" })).toBeInTheDocument();
     expect(screen.getByText("Sample")).toBeInTheDocument();
+    expect(screen.getByText("HN755235")).toBeInTheDocument();
     expect(screen.getByText("Visitor")).toBeInTheDocument();
     expect(screen.getByText("เชียงใหม่")).toBeInTheDocument();
     expect(screen.getByText("สำนักงานสาธิตชื่อยาว")).toBeInTheDocument();
@@ -268,6 +271,7 @@ describe("booking confirmation and electronic ticket", () => {
         serviceId: "22222222-2222-4222-8222-222222222222",
         vehicleCategory: "",
         applicantDisplayName: "Sample Visitor",
+        identityNumber: "HN755235",
         contactEmail: "",
         contactPhone: "",
         notes: "",

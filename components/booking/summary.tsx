@@ -4,6 +4,7 @@ import { useI18n } from "@/components/language";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import type { VerificationOutcome } from "@/lib/booking/outcomes";
 import type { PublicBooking } from "@/lib/booking/public-view";
+import { formatIdentityNumber } from "@/lib/booking/identity";
 import { formatLongDate, formatVisitRange } from "@/lib/time";
 
 export function BookingSummary({ booking, outcome }: { booking: PublicBooking | null; outcome: VerificationOutcome }) {
@@ -22,6 +23,10 @@ export function BookingSummary({ booking, outcome }: { booking: PublicBooking | 
           <div>
             <dt className="text-muted">{t.book.name}</dt>
             <dd className="font-semibold">{booking.applicantDisplayName}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">{t.confirm.idNo}</dt>
+            <dd className="font-semibold">{formatIdentityNumber(booking.identityNumber) || "—"}</dd>
           </div>
           <div>
             <dt className="text-muted">{t.staff.office}</dt>

@@ -84,6 +84,7 @@ export function createVideoPreviewWriter(): BookingWriter {
         reference: input.reference,
         status: "confirmed",
         applicantDisplayName: input.applicantDisplayName,
+        identityNumber: input.identityNumber,
         vehicleCategory: input.vehicleCategory,
         officeName: office.data.name,
         officeNameTh: office.data.name_th,

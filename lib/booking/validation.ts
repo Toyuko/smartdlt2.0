@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { REFERENCE_PATTERN } from "@/lib/booking/codes";
+import { normalizeIdentityNumber } from "@/lib/booking/identity";
 
 const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i, "invalid_id");
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,6 +22,7 @@ export const bookingRequestSchema = z
     serviceId: uuid,
     vehicleCategory: z.string().trim().max(40),
     applicantDisplayName: z.string().trim().min(2, "name_short").max(80, "name_long"),
+    identityNumber: z.string().trim().min(1, "identity_required").max(40, "identity_invalid"),
     contactEmail: z.string().trim().max(120),
     contactPhone: z.string().trim().max(20),
     notes: z.string().trim().max(500, "notes_long"),
@@ -46,6 +48,9 @@ export const bookingRequestSchema = z
     }
     if (value.contactPhone && !phonePattern.test(value.contactPhone)) {
       ctx.addIssue({ code: "custom", message: "phone_invalid", path: ["contactPhone"] });
+    }
+    if (!normalizeIdentityNumber(value.identityNumber)) {
+      ctx.addIssue({ code: "custom", message: "identity_invalid", path: ["identityNumber"] });
     }
     rejectGovernmentNumbers(value.applicantDisplayName, ctx, "applicantDisplayName");
     rejectGovernmentNumbers(value.contactPhone, ctx, "contactPhone");

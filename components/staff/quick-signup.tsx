@@ -89,6 +89,7 @@ export function QuickSignup() {
   const [vehicleCategory, setVehicleCategory] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [name, setName] = useState("");
+  const [identityNumber, setIdentityNumber] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [acceptDisclaimer, setAcceptDisclaimer] = useState(false);
@@ -246,6 +247,7 @@ export function QuickSignup() {
       serviceId,
       vehicleCategory: service.requiresVehicle ? vehicleCategory : "",
       applicantDisplayName: name.trim(),
+      identityNumber: identityNumber.trim(),
       contactEmail: email.trim(),
       contactPhone: phone.trim(),
       notes: "",
@@ -300,6 +302,7 @@ export function QuickSignup() {
       setLatest(added);
       setRecent((current) => [added, ...current].slice(0, 8));
       setName("");
+      setIdentityNumber("");
       setEmail("");
       setPhone("");
       setFieldErrors({});
@@ -356,6 +359,15 @@ export function QuickSignup() {
                 autoComplete="off"
                 autoFocus
                 onChange={(event) => setName(event.target.value)}
+              />
+            </Field>
+            <Field label={t.book.identityNumber} hint={t.book.identityHint} error={errorText(t.errors, fieldErrors.identityNumber)}>
+              <input
+                className={inputClass}
+                value={identityNumber}
+                autoComplete="off"
+                spellCheck={false}
+                onChange={(event) => setIdentityNumber(event.target.value)}
               />
             </Field>
             <Field label={`${t.book.phone} (${t.book.optional})`} error={errorText(t.errors, fieldErrors.contactPhone)}>

@@ -82,6 +82,7 @@ describe("staff quick signup", () => {
     const slotText = `${formatBookingDate(startsAt)} ${formatVisitRange(startsAt, endsAt)}`;
     expect(await screen.findByRole("option", { name: new RegExp(slotText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) })).toBeInTheDocument();
     await user.type(screen.getByRole("textbox", { name: "Display name" }), "Sample Visitor");
+    await user.type(screen.getByRole("textbox", { name: /Thai ID or passport number/ }), "HN755235");
     await user.click(screen.getByRole("checkbox", { name: /demonstration booking/ }));
     await user.click(screen.getByRole("button", { name: "Add customer" }));
 
@@ -92,6 +93,7 @@ describe("staff quick signup", () => {
       officeId,
       serviceId,
       applicantDisplayName: "Sample Visitor",
+      identityNumber: "HN755235",
       applicantCategory: "thai",
       timeSlotId: slotId,
       acceptDisclaimer: true,

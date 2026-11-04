@@ -1,4 +1,5 @@
 import { categoryBySlug, inferLicenceClass, snapshotGuidance, type SavedGuidance } from "@/lib/booking/categories";
+import { formatIdentityNumber } from "@/lib/booking/identity";
 import type { VerificationOutcome } from "@/lib/booking/outcomes";
 import type { PublicBooking } from "@/lib/booking/public-view";
 import { vehicleCategorySeed } from "@/lib/demo-catalog";
@@ -98,6 +99,7 @@ export function presentTicket(booking: PublicBooking, locale: "en" | "th") {
     serviceEn: booking.serviceName,
     serviceTh: booking.serviceNameTh,
     name: booking.applicantDisplayName,
+    identityNumber: formatIdentityNumber(booking.identityNumber),
     reference: booking.reference,
     guidance: guidanceForBooking(booking),
     demoLabel: booking.demoLabel,

@@ -6,6 +6,7 @@ export type PublicBooking = {
   reference: string;
   status: BookingStatus;
   applicantDisplayName: string;
+  identityNumber: string | null;
   vehicleCategory: string | null;
   officeName: string;
   officeNameTh: string;
@@ -31,6 +32,7 @@ export function toPublicBooking(booking: PublicBooking): PublicBooking {
     reference: booking.reference,
     status: booking.status,
     applicantDisplayName: booking.applicantDisplayName,
+    identityNumber: booking.identityNumber,
     vehicleCategory: booking.vehicleCategory,
     officeName: booking.officeName,
     officeNameTh: booking.officeNameTh,

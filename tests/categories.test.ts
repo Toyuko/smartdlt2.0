@@ -243,6 +243,7 @@ describe("booking categories", () => {
       serviceId: "22222222-2222-4222-8222-222222222222",
       vehicleCategory: "",
       applicantDisplayName: "Sample Visitor",
+      identityNumber: "1103700123458",
       contactEmail: "",
       contactPhone: "",
       notes: "",

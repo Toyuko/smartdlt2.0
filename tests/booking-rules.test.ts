@@ -4,6 +4,7 @@ import { createDemoBooking, type BookingWriter } from "@/lib/booking/create-book
 import { decideVerificationOutcome } from "@/lib/booking/outcomes";
 import { toPublicBooking, type PublicBooking } from "@/lib/booking/public-view";
 import { generateReference, generateToken, hashToken } from "@/lib/booking/token-core";
+import { formatIdentityNumber, normalizeIdentityNumber } from "@/lib/booking/identity";
 import { bookingRequestSchema } from "@/lib/booking/validation";
 import { HttpError } from "@/lib/http";
 import { formatLongDate } from "@/lib/time";
@@ -14,6 +15,7 @@ const booking: PublicBooking = {
   reference: "VD-TEST-BOOK",
   status: "confirmed",
   applicantDisplayName: "Sample Visitor",
+  identityNumber: "1103700123458",
   vehicleCategory: "car",
   officeName: "SmartDLT2.0 Riverside Demo",
   officeNameTh: "SmartDLT2.0 สาขาสาธิตริมน้ำ",
@@ -38,6 +40,7 @@ const request = {
   serviceId: "22222222-2222-4222-8222-222222222222",
   vehicleCategory: "car",
   applicantDisplayName: "Sample Visitor",
+  identityNumber: "1103700123458",
   contactEmail: "visitor@example.com",
   contactPhone: "",
   notes: "",
@@ -83,6 +86,16 @@ describe("demo booking rules", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("accepts a Thai national ID or a passport number", () => {
+    expect(normalizeIdentityNumber("1-1037-00123-45-8")).toBe("1103700123458");
+    expect(formatIdentityNumber("1103700123458")).toBe("1-1037-00123-45-8");
+    expect(normalizeIdentityNumber("hn755235")).toBe("HN755235");
+    expect(normalizeIdentityNumber("1103700123456")).toBeNull();
+    expect(bookingRequestSchema.safeParse({ ...request, identityNumber: "HN755235" }).success).toBe(true);
+    expect(bookingRequestSchema.safeParse({ ...request, identityNumber: "" }).success).toBe(false);
+    expect(bookingRequestSchema.safeParse({ ...request, identityNumber: "1103700123456" }).success).toBe(false);
+  });
+
   it("formats 29 October 2026 in the Buddhist era for Thai", () => {
     expect(formatLongDate("2026-10-29T01:00:00.000Z", "th")).toContain("2569");
     expect(formatLongDate("2026-10-29T01:00:00.000Z", "en")).toContain("2026");
@@ -93,6 +106,7 @@ describe("demo booking rules", () => {
     expect(result.verificationUrl).toMatch(/^https:\/\/demo\.example\/demo-ticket\/[^/?#]+$/);
     expect(result.verificationUrl).not.toContain("visitor@example.com");
     expect(result.verificationUrl).not.toContain("Sample");
+    expect(result.verificationUrl).not.toContain("1103700123458");
     expect(result.booking).not.toHaveProperty("contactEmail");
     expect(toPublicBooking(booking)).not.toHaveProperty("notes");
   });

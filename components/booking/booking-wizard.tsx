@@ -27,6 +27,7 @@ import {
   type BookingCategory,
   type WizardStepId,
 } from "@/lib/booking/categories";
+import { formatIdentityNumber } from "@/lib/booking/identity";
 import { bookingRequestSchema, type BookingRequest } from "@/lib/booking/validation";
 import { renewalReviewEntries, renewalVehicles } from "@/lib/booking/renewal-form";
 import { serviceChoiceDetail } from "@/lib/demo-catalog";
@@ -47,6 +48,7 @@ const empty: BookingRequest = {
   serviceId: "",
   vehicleCategory: "",
   applicantDisplayName: "",
+  identityNumber: "",
   contactEmail: "",
   contactPhone: "",
   notes: "",
@@ -544,6 +546,9 @@ export function BookingWizard() {
               <Field label={t.book.name} error={errorText(t.errors, form.formState.errors.applicantDisplayName?.message)}>
                 <input className={inputClass} {...form.register("applicantDisplayName")} autoComplete="name" />
               </Field>
+              <Field label={t.book.identityNumber} hint={t.book.identityHint} error={errorText(t.errors, form.formState.errors.identityNumber?.message)}>
+                <input className={inputClass} {...form.register("identityNumber")} autoComplete="off" spellCheck={false} />
+              </Field>
               <Field label={`${t.book.email} (${t.book.optional})`} error={errorText(t.errors, form.formState.errors.contactEmail?.message)}>
                 <input className={inputClass} {...form.register("contactEmail")} autoComplete="email" inputMode="email" />
               </Field>
@@ -615,6 +620,7 @@ export function BookingWizard() {
           {step === "review" ? (
             <div className="space-y-3 text-sm leading-6">
               <Review label={t.book.name} value={values.applicantDisplayName} />
+              <Review label={t.confirm.idNo} value={formatIdentityNumber(values.identityNumber) || values.identityNumber} />
               <Review label={t.confirm.applicantCategory} value={values.applicantCategory === "foreign" ? t.book.applicantForeign : t.book.applicantThai} />
               <Review label={t.staff.office} value={office ? `${locale === "th" ? office.nameTh : office.name} — ${office.demoLabel}` : ""} />
               <Review label={t.confirm.category} value={category ? (locale === "th" ? category.nameTh : category.name) : ""} />
@@ -672,7 +678,7 @@ function fieldsFor(step: WizardStepId): (keyof BookingRequest)[] {
   if (step === "applicantCategory") return ["applicantCategory"];
   if (step === "office") return ["officeId"];
   if (step === "service") return ["serviceId"];
-  if (step === "applicant") return ["applicantDisplayName", "contactEmail", "contactPhone", "notes"];
+  if (step === "applicant") return ["applicantDisplayName", "identityNumber", "contactEmail", "contactPhone", "notes"];
   if (step === "review") return ["acceptDisclaimer"];
   return [];
 }

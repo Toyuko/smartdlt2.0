@@ -218,6 +218,7 @@ function bookingRow(input: {
     time_slot_id: input.slotId,
     vehicle_category: input.vehicle,
     applicant_display_name: input.name,
+    identity_number: "1103700123458",
     status: input.status,
     verification_token_hash: hashToken(token),
     idempotency_key: crypto.randomUUID(),

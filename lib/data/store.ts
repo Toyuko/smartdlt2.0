@@ -64,14 +64,14 @@ export type AuditEntry = {
 };
 
 const PUBLIC_COLUMNS = `
-  id, reference, status, applicant_display_name, vehicle_category, applicant_category, answers, document_guidance,
+  id, reference, status, applicant_display_name, identity_number, vehicle_category, applicant_category, answers, document_guidance,
   offices!bookings_office_id_fkey ( name, name_th, province, province_th, demo_label ),
   services!bookings_service_id_fkey ( name, name_th, category, category_th, slug ),
   time_slots!bookings_time_slot_id_fkey ( starts_at, ends_at )
 `;
 
 const STAFF_COLUMNS = `
-  id, reference, status, applicant_display_name, vehicle_category, applicant_category, answers, document_guidance,
+  id, reference, status, applicant_display_name, identity_number, vehicle_category, applicant_category, answers, document_guidance,
   contact_email, contact_phone, notes, created_at, checked_in_at, completed_at, cancelled_at,
   office_id, service_id, time_slot_id,
   offices!bookings_office_id_fkey ( name, name_th, province, province_th, demo_label ),
@@ -117,6 +117,7 @@ function mapPublic(row: Record<string, unknown>): PublicBooking {
     reference: String(row.reference),
     status,
     applicantDisplayName: String(row.applicant_display_name),
+    identityNumber: row.identity_number ? String(row.identity_number) : null,
     vehicleCategory: row.vehicle_category ? String(row.vehicle_category) : null,
     officeName: office.name,
     officeNameTh: office.name_th,
@@ -266,6 +267,7 @@ export function createSupabaseBookingWriter(): BookingWriter {
         p_token_hash: input.tokenHash,
         p_applicant_category: input.applicantCategory,
         p_answers: input.answers,
+        p_identity_number: input.identityNumber,
         p_document_guidance: input.documentGuidance,
       });
       if (error) fail(error, "reserve_failed");

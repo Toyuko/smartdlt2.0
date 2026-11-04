@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { BookingSummary } from "@/components/booking/summary";
 import { errorText, useI18n } from "@/components/language";
 import { answerLabel, categoryBySlug } from "@/lib/booking/categories";
+import { formatIdentityNumber } from "@/lib/booking/identity";
 import { renewalReviewEntries } from "@/lib/booking/renewal-form";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
 import { Button, Field, Panel, inputClass } from "@/components/ui";
@@ -323,6 +324,7 @@ export function BookingDetail({ id }: { id: string }) {
       <p className="mt-2 text-sm text-muted">{booking.demoLabel}</p>
       <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
         <Info label={t.book.name} value={booking.applicantDisplayName} />
+        <Info label={t.confirm.idNo} value={formatIdentityNumber(booking.identityNumber) || "—"} />
         <Info label={t.staff.applicantCategory} value={booking.applicantCategory ?? "—"} />
         <Info label={t.staff.status} value={booking.status} />
         <Info label={t.staff.office} value={locale === "th" ? booking.officeNameTh : booking.officeName} />

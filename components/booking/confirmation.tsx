@@ -70,7 +70,9 @@ export function ConfirmationScreen({
             </div>
             <div className="min-w-0">
               <p className="text-xs text-[#9a9aa6]">{t.confirm.idNo}</p>
-              <p className="mt-2 text-[13px] font-bold tracking-tight text-[#6d3cc8]">{view.reference}</p>
+              <p data-testid="identity-number" className="mt-2 break-all text-[13px] font-bold tracking-tight text-[#6d3cc8]">
+                {view.identityNumber || "—"}
+              </p>
             </div>
           </div>
         </section>

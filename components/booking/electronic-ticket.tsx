@@ -12,7 +12,7 @@ import type { PublicBooking } from "@/lib/booking/public-view";
 const SHEET = {
   title: "ใบนัดอิเล็กทรอนิกส์(E-Booking)",
   personal: "ข้อมูลส่วนตัว",
-  citizenId: "หมายเลขประจำตัวประชาชน",
+  citizenId: "เลขประจำตัวประชาชน / หนังสือเดินทาง",
   firstName: "ชื่อ",
   lastName: "นามสกุล",
   booking: "ข้อมูลการจอง",
@@ -79,7 +79,7 @@ export function ElectronicTicket({
         </p>
 
         <Section title={SHEET.personal}>
-          <Field label={SHEET.citizenId} value={view.reference} />
+          <Field label={SHEET.citizenId} value={view.identityNumber || "—"} />
           <Field label={SHEET.firstName} value={view.firstName} />
           <Field label={SHEET.lastName} value={view.lastName} />
         </Section>

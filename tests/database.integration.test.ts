@@ -257,6 +257,79 @@ describe("reservation database", () => {
     ).rejects.toThrow(/validation/);
   });
 
+  it("stores a Thai national ID or a passport number and rejects a bad check digit", async () => {
+    await db.query(
+      `insert into time_slots (id, office_id, service_id, starts_at, ends_at, capacity)
+       values ('24242424-2424-4424-8424-242424242424', '11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', now() + interval '6 days', now() + interval '6 days 1 hour', 2)`,
+    );
+    const thai = await db.query(
+      `select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14::jsonb,$15) as result`,
+      [
+        "11111111-1111-4111-8111-111111111111",
+        "22222222-2222-4222-8222-222222222222",
+        "24242424-2424-4424-8424-242424242424",
+        "car",
+        "Sample Visitor",
+        null,
+        null,
+        null,
+        "25252525-2525-4525-8525-252525252525",
+        "VD-TEST-THID",
+        "e".repeat(64),
+        "thai",
+        "{}",
+        "{}",
+        "1103700123458",
+      ],
+    );
+    expect(row<{ result: { reference: string } }>(thai).result.reference).toBe("VD-TEST-THID");
+    const saved = await db.query(`select identity_number from bookings where reference = 'VD-TEST-THID'`);
+    expect(row<{ identity_number: string }>(saved).identity_number).toBe("1103700123458");
+    await expect(
+      db.query(
+        `select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14::jsonb,$15)`,
+        [
+          "11111111-1111-4111-8111-111111111111",
+          "22222222-2222-4222-8222-222222222222",
+          "24242424-2424-4424-8424-242424242424",
+          "car",
+          "Sample Visitor",
+          null,
+          null,
+          null,
+          "26262626-2626-4626-8626-262626262626",
+          "VD-TEST-BADI",
+          "f".repeat(64),
+          null,
+          "{}",
+          "{}",
+          "1103700123456",
+        ],
+      ),
+    ).rejects.toThrow(/validation/);
+    const passport = await db.query(
+      `select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14::jsonb,$15) as result`,
+      [
+        "11111111-1111-4111-8111-111111111111",
+        "22222222-2222-4222-8222-222222222222",
+        "24242424-2424-4424-8424-242424242424",
+        "car",
+        "Sample Visitor",
+        null,
+        null,
+        null,
+        "27272727-2727-4727-8727-272727272727",
+        "VD-TEST-PASS",
+        "9".repeat(64),
+        "foreign",
+        "{}",
+        "{}",
+        "HN755235",
+      ],
+    );
+    expect(row<{ result: { idempotent: boolean } }>(passport).result.idempotent).toBe(false);
+  });
+
   it("enforces the rate limit window", async () => {
     const first = await db.query(`select public.consume_rate_limit('booking_create', 'hash', 2, 3600) as allowed`);
     const second = await db.query(`select public.consume_rate_limit('booking_create', 'hash', 2, 3600) as allowed`);

@@ -1,4 +1,5 @@
 import { buildVerificationUrl } from "@/lib/booking/codes";
+import { normalizeIdentityNumber } from "@/lib/booking/identity";
 import { inferLicenceClass, snapshotGuidance, validateSelection, type BookingCategory, type SavedGuidance } from "@/lib/booking/categories";
 import { toPublicBooking, type PublicBooking } from "@/lib/booking/public-view";
 import { generateReference, generateToken, hashToken } from "@/lib/booking/tokens";
@@ -19,6 +20,7 @@ export type ReserveInput = {
   reference: string;
   tokenHash: string;
   applicantCategory: string | null;
+  identityNumber: string;
   answers: Record<string, string>;
   documentGuidance: SavedGuidance;
 };
@@ -67,6 +69,10 @@ export async function createDemoBooking(
   }
 
   const data = parsed.data;
+  const identityNumber = normalizeIdentityNumber(data.identityNumber);
+  if (!identityNumber) {
+    throw new HttpError(400, "validation", "Check the highlighted fields.", { identityNumber: "identity_invalid" });
+  }
   const context = await writer.loadContext(data.officeId, data.serviceId);
   if (!context) throw new HttpError(409, "slot_unavailable");
   const decision = validateSelection({
@@ -105,6 +111,7 @@ export async function createDemoBooking(
         reference,
         tokenHash: hashToken(token),
         applicantCategory: data.applicantCategory,
+        identityNumber,
         answers: decision.answers,
         documentGuidance,
       });
