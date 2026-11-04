@@ -10,7 +10,7 @@ import { categoryBySlug, snapshotGuidance } from "@/lib/booking/categories";
 import { createDemoBooking, type BookingWriter } from "@/lib/booking/create-booking";
 import { DATABASE_RETRY_TH, TICKET_STATUS_TH } from "@/lib/booking/ticket-view";
 import { formatBookingDate, formatSlotRange } from "@/lib/time";
-import { DEMO_NOTICE, DEMO_QR_CODE_WARNING } from "@/lib/demo-notice";
+import { DEMO_NOTICE } from "@/lib/demo-notice";
 import type { PublicBooking } from "@/lib/booking/public-view";
 
 vi.mock("qrcode", () => ({
@@ -89,7 +89,7 @@ describe("booking confirmation and electronic ticket", () => {
     expect(screen.getByTestId("office-name").className).toContain("break-words");
     expect(screen.getByText("Motorcycle")).toBeInTheDocument();
     expect(screen.getByTestId("qr-print")).toHaveAttribute("data-qr-payload", ticketUrl);
-    expect(screen.getByTestId("qr-warning")).toHaveTextContent(DEMO_QR_CODE_WARNING);
+    expect(screen.queryByText(/DEMO QR CODE/)).not.toBeInTheDocument();
     expect(screen.getByTestId("print-disclaimer")).toHaveTextContent(DEMO_NOTICE);
     expect(screen.getByTestId("confirmation-layout").className).toContain("max-w-md");
     expect(screen.getByTestId("confirmation-layout").className).toContain("lg:max-w-xl");
