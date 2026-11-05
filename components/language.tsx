@@ -136,10 +136,7 @@ function SiteHeader() {
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-brand text-lg font-bold text-white" aria-hidden>
             S
           </span>
-          <span>
-            <span className="block text-base font-bold leading-5">{t.brand}</span>
-            <span className="block text-xs text-muted">{t.tagline}</span>
-          </span>
+          <span className="block text-base font-bold leading-5">{t.brand}</span>
         </Link>
         <nav className="flex flex-wrap items-center gap-1" aria-label="Primary">
           {links.map(([href, label]) => {
