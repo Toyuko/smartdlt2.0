@@ -136,7 +136,7 @@ export function QuickSignup() {
   const today = bangkokDateParts().isoDate;
   const horizonDays = category?.slotRules.horizonDays ?? 21;
   const renewal = category ? evaluateRenewal(category, answers, today) : { state: "not_applicable" as const };
-  const renewalBlocked = renewal.state === "outside" || renewal.state === "invalid_date" || renewal.state === "missing";
+  const renewalBlocked = renewal.state === "invalid_date" || renewal.state === "missing";
   const renewalHint = category ? describeRenewalRules(category.slotRules, locale) : "";
 
   if (catalog && catalog !== seenCatalog) {
@@ -446,7 +446,6 @@ export function QuickSignup() {
               ))}
             </div>
           ) : null}
-          {renewal.state === "outside" ? <p role="alert" className="text-sm font-semibold text-full">{t.book.renewalOutside}</p> : null}
           <Field label={t.staff.signupSlot} hint={t.staff.signupSlotHint} error={errorText(t.errors, fieldErrors.timeSlotId)}>
             {slotsLoading ? <p className="text-sm text-muted">{t.book.loading}</p> : null}
             {!slotsLoading && !renewalBlocked && openSlots.length === 0 ? <p className="text-sm text-muted">{t.staff.signupNoSlots}</p> : null}

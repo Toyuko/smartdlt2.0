@@ -155,7 +155,7 @@ describe("booking categories", () => {
     }).id).toBe("idp-checklist");
   });
 
-  it("validates dates and blocks a renewal outside the configurable demo window", () => {
+  it("validates dates and accepts a renewal outside the configurable demo window", () => {
     const renewal = category("thai-renewal");
     expect(describeRenewalRules(renewal.slotRules, "en")).toContain("60");
     expect(describeRenewalRules(renewal.slotRules, "en")).toContain("not a legal determination");
@@ -163,10 +163,10 @@ describe("booking categories", () => {
     expect(evaluateRenewal(renewal, { currentLicenceType: "temporary", expiryDate: "2027-06-01" }, today).state).toBe("outside");
     expect(evaluateRenewal(renewal, { currentLicenceType: "temporary", expiryDate: "2026-11-01" }, today).state).toBe("ok");
     expect(evaluateRenewal(renewal, { currentLicenceType: "five_year", expiryDate: "2026-10-01" }, today).state).toBe("ok");
-    const blocked = selection(baseSelection(renewal, { currentLicenceType: "temporary", expiryDate: "2027-06-01" }));
-    expect(blocked.ok).toBe(false);
-    expect(blocked.fieldErrors.expiryDate).toBe("renewal_window");
-    expect(blocked.answers).not.toHaveProperty("issuingCountry");
+    const outside = selection(baseSelection(renewal, { currentLicenceType: "temporary", expiryDate: "2027-06-01" }));
+    expect(outside.ok).toBe(true);
+    expect(outside.fieldErrors.expiryDate).toBeUndefined();
+    expect(outside.answers).not.toHaveProperty("issuingCountry");
     const both = selection({
       ...baseSelection(renewal, {
         motorcycleDay: "01",
@@ -179,8 +179,8 @@ describe("booking categories", () => {
       }),
       serviceSlug: "renewal-car-motorcycle",
     });
-    expect(both.ok).toBe(false);
-    expect(both.fieldErrors.carDay).toBe("renewal_window");
+    expect(both.ok).toBe(true);
+    expect(both.fieldErrors.carDay).toBeUndefined();
     expect(both.answers.motorcycleExpiryDate).toBe("2026-11-01");
     expect(both.answers.currentLicenceType).toBe("five_year");
   });
@@ -220,7 +220,7 @@ describe("booking categories", () => {
     expect(buildWizardSteps({ requiresVehicle: true, hasQuestions: true })).toContain("questions");
   });
 
-  it("rejects an invalid expiry before a booking is reserved", async () => {
+  it("rejects an impossible expiry before a booking is reserved", async () => {
     let reserved = false;
     const writer: BookingWriter = {
       consumeRateLimit: async () => true,
@@ -252,7 +252,7 @@ describe("booking categories", () => {
       idempotencyKey: "44444444-4444-4444-8444-444444444444",
       applicantCategory: "thai",
       categorySlug: "thai-renewal",
-      answers: { currentLicenceType: "temporary", expiryDate: "2099-01-01" },
+      answers: { currentLicenceType: "temporary", expiryDate: "2099-13-40" },
     });
     expect(parsed.success).toBe(true);
     await expect(

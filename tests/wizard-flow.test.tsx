@@ -85,7 +85,7 @@ describe("wizard navigation", () => {
     expect(screen.getByRole("radio", { name: /Thai applicant/ })).toBeChecked();
   });
 
-  it("drops renewal questions after the category changes and blocks a bad expiry", async () => {
+  it("drops renewal questions after the category changes and continues past an expiry outside the demo window", async () => {
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes("/api/availability")) return Response.json({ slots: [] });
@@ -114,7 +114,9 @@ describe("wizard navigation", () => {
     await user.selectOptions(screen.getByLabelText("Month"), "06");
     await user.selectOptions(screen.getByLabelText("Year"), "2028");
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    expect(screen.getAllByText(/outside the configured demonstration window/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/outside the configured demonstration window/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Display name")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Previous" }));
     await user.click(screen.getByRole("button", { name: "Previous" }));
     await user.click(screen.getByRole("button", { name: "Previous" }));
     await user.click(screen.getByRole("radio", { name: /Foreign Licence Conversion/ }));

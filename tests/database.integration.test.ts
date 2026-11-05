@@ -105,7 +105,7 @@ describe("reservation database", () => {
     ).rejects.toThrow(/unauthorized|not_found/);
   });
 
-  it("rejects a renewal date outside the configured demo window and accepts one inside it", async () => {
+  it("accepts a renewal date outside the configured demo window and one inside it", async () => {
     await db.query(`update booking_categories set eligible_office_slugs = eligible_office_slugs || array['desk'] where slug = 'thai-renewal'`);
     const service = await db.query(`select id from services where slug = 'renewal-car'`);
     const serviceId = row<{ id: string }>(service).id;
@@ -118,23 +118,22 @@ describe("reservation database", () => {
     const later = await db.query(`select to_char((timezone('Asia/Bangkok', now()))::date + 200, 'YYYY-MM-DD') as expiry`);
     const soonDate = row<{ expiry: string }>(soon).expiry;
     const laterDate = row<{ expiry: string }>(later).expiry;
-    await expect(
-      db.query(`select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb)`, [
-        "11111111-1111-4111-8111-111111111111",
-        serviceId,
-        "14141414-1414-4414-8414-141414141414",
-        null,
-        "Renewal Visitor",
-        null,
-        null,
-        null,
-        "15151515-1515-4515-8515-151515151515",
-        "VD-TEST-RENO",
-        "c".repeat(64),
-        "thai",
-        JSON.stringify({ currentLicenceType: "temporary", expiryDate: laterDate }),
-      ]),
-    ).rejects.toThrow(/renewal_window/);
+    const outside = await db.query(`select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb) as result`, [
+      "11111111-1111-4111-8111-111111111111",
+      serviceId,
+      "14141414-1414-4414-8414-141414141414",
+      null,
+      "Renewal Visitor",
+      null,
+      null,
+      null,
+      "15151515-1515-4515-8515-151515151515",
+      "VD-TEST-RENO",
+      "c".repeat(64),
+      "thai",
+      JSON.stringify({ currentLicenceType: "temporary", expiryDate: laterDate }),
+    ]);
+    expect(row<{ result: { idempotent: boolean } }>(outside).result.idempotent).toBe(false);
     const reserved = await db.query(`select public.reserve_demo_booking($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb) as result`, [
       "11111111-1111-4111-8111-111111111111",
       serviceId,

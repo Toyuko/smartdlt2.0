@@ -153,7 +153,7 @@ export function BookingWizard() {
   const horizonDays = category?.slotRules.horizonDays ?? 21;
   const maxMonth = shiftIsoDate(today, horizonDays).slice(0, 7);
   const renewal = category ? evaluateRenewal(category, values.answers, today) : { state: "not_applicable" as const };
-  const renewalBlocked = renewal.state === "outside" || renewal.state === "invalid_date" || renewal.state === "missing";
+  const renewalBlocked = renewal.state === "invalid_date" || renewal.state === "missing";
 
   const slotRequestKey = `${values.officeId}|${values.serviceId}|${monthKey}`;
   const slotsReady = loadedSlotKey === slotRequestKey;
@@ -236,9 +236,6 @@ export function BookingWizard() {
 
   function replaceAnswers(next: Record<string, string>) {
     form.setValue("answers", next);
-    if (category && evaluateRenewal(category, next, today).state === "outside") {
-      form.setValue("timeSlotId", "");
-    }
     setAnswerErrors({});
   }
 
@@ -262,10 +259,6 @@ export function BookingWizard() {
       form.setValue("answers", decision.answers);
     }
     if (step === "schedule") {
-      if (renewal.state === "outside") {
-        setFormError("renewal_window");
-        return;
-      }
       if (!values.timeSlotId || !slot) {
         form.setError("timeSlotId", { message: "invalid_id" });
         return;
@@ -530,10 +523,7 @@ export function BookingWizard() {
               ))
             : null}
           {step === "questions" && renewalForm ? (
-            <>
-              <RenewalLicenceForm serviceSlug={service?.slug ?? ""} answers={values.answers} errors={answerErrors} onChange={replaceAnswers} />
-              {renewal.state === "outside" ? <p role="alert" className="text-sm font-semibold text-full">{t.book.renewalOutside}</p> : null}
-            </>
+            <RenewalLicenceForm serviceSlug={service?.slug ?? ""} answers={values.answers} errors={answerErrors} onChange={replaceAnswers} />
           ) : null}
           {step === "questions" && !renewalForm ? (
             <div className="queue-fields grid gap-5">
@@ -566,7 +556,6 @@ export function BookingWizard() {
                   </Field>
                 );
               })}
-              {renewal.state === "outside" ? <p role="alert" className="text-sm font-semibold text-full">{t.book.renewalOutside}</p> : null}
             </div>
           ) : null}
           {step === "applicant" ? (
@@ -590,9 +579,6 @@ export function BookingWizard() {
           ) : null}
           {step === "documents" && guidance ? <DocumentGuidance set={guidance} /> : null}
           {step === "schedule" ? (
-            renewal.state === "outside" ? (
-              <p role="alert" className="text-sm font-semibold text-full">{t.book.renewalOutside}</p>
-            ) : (
               <div className="grid gap-6 lg:grid-cols-2">
                 <div>
                   <p className="mb-3 text-sm font-semibold text-muted">{t.book.bangkokClock}</p>
@@ -643,7 +629,6 @@ export function BookingWizard() {
                   {form.formState.errors.timeSlotId ? <p role="alert" className="mt-2 text-sm text-full">{errorText(t.errors, form.formState.errors.timeSlotId.message)}</p> : null}
                 </div>
               </div>
-            )
           ) : null}
           {step === "review" ? (
             <div className="space-y-3 text-sm leading-6">
@@ -689,8 +674,7 @@ export function BookingWizard() {
               onClick={next}
               disabled={
                 (step === "category" && !values.categorySlug) ||
-                (step === "service" && visibleServices.length === 0) ||
-                (step === "schedule" && renewal.state === "outside")
+                (step === "service" && visibleServices.length === 0)
               }
             >
               {t.actions.continue}

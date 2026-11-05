@@ -336,8 +336,8 @@ export const bookingCategorySeed: BookingCategory[] = [
         key: "expiryDate",
         labelEn: "Current expiry date",
         labelTh: "วันหมดอายุปัจจุบัน",
-        helpEn: "Use a date. If it sits outside the configured demo window, you can read the warning but not pick a slot.",
-        helpTh: "ใส่วันที่ หากอยู่นอกช่วงสาธิตที่ตั้งไว้ จะเห็นคำเตือนและเลือกช่วงเวลาไม่ได้",
+        helpEn: "Use the expiry date on the licence. This demonstration accepts a date outside the sample window.",
+        helpTh: "ใช้วันหมดอายุบนใบอนุญาต ระบบสาธิตนี้รับวันที่ที่อยู่นอกช่วงตัวอย่าง",
         kind: "date",
         required: true,
       },
@@ -825,8 +825,6 @@ export function validateSelection(input: SelectionInput) {
       }
     }
     const renewal = evaluateRenewal(category, answers, input.today);
-    const renewalKey = renewal.vehicle ? `${renewal.vehicle}Day` : "expiryDate";
-    if (renewal.state === "outside") errors[renewalKey] = "renewal_window";
     if (renewal.state === "invalid_date" && !renewal.vehicle) errors.expiryDate = "date_invalid";
     if (renewal.state === "missing" && !cardForm && !errors.currentLicenceType && !errors.expiryDate) {
       errors.currentLicenceType = "answer_required";
