@@ -23,8 +23,12 @@ export function errorText(errors: Dictionary["errors"], code: string | undefined
   return code in errors ? errors[code as keyof Dictionary["errors"]] : errors.server_error;
 }
 
+function isTicketPath(pathname: string) {
+  return pathname.startsWith("/e-booking") || pathname.startsWith("/demo-ticket");
+}
+
 function isImmersivePath(pathname: string) {
-  return pathname.startsWith("/booking-confirmation") || pathname.startsWith("/e-booking") || pathname.startsWith("/demo-ticket");
+  return pathname.startsWith("/booking-confirmation") || isTicketPath(pathname);
 }
 
 function isBookPath(pathname: string) {
@@ -57,8 +61,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <a href="#content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-3 focus:py-2">
           Skip to content
         </a>
-        {/* Pathname is unknown while prerendering dynamic routes, so the chrome that reads it must suspend. */}
-        <Suspense fallback={<ChromeFallback />}>
+        {/* Pathname is unknown while prerendering dynamic routes, so the chrome that reads it must suspend.
+            The fallback stays empty so the confirmation QR page does not flash the purple notice before the path is known. */}
+        <Suspense fallback={null}>
           <RouteChrome />
         </Suspense>
         <div id="content" className="flex-1">
@@ -74,20 +79,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
   );
 }
 
-function ChromeFallback() {
-  return (
-    <>
-      <div className="bg-brand-dark px-4 py-2 text-center text-xs font-semibold leading-5 text-white sm:text-sm">
-        <p>{DEMO_NOTICE}</p>
-      </div>
-      <div className="h-16 border-b border-line bg-white" />
-    </>
-  );
-}
-
 function RouteChrome() {
   const pathname = usePathname() ?? "/";
-  if (isBookPath(pathname)) return null;
+  if (isBookPath(pathname) || isTicketPath(pathname)) return null;
   return (
     <div className={isImmersivePath(pathname) ? "max-lg:hidden" : undefined}>
       <DemoBanner />
