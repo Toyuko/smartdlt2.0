@@ -20,6 +20,14 @@ export function buildVerificationUrl(origin: string, token: string) {
   return url.toString();
 }
 
+export function buildReferenceSlipUrl(origin: string, reference: string) {
+  const base = origin.endsWith("/") ? origin : `${origin}/`;
+  const url = new URL(`${TICKET_PATH}/r/${encodeURIComponent(reference)}`, base);
+  url.search = "";
+  url.hash = "";
+  return url.toString();
+}
+
 export function resolveTicketOrigin(headerList: { get(name: string): string | null }) {
   const configured = process.env.APP_BASE_URL?.trim();
   if (configured) return configured.replace(/\/$/, "");
@@ -53,6 +61,12 @@ export function parseScanPayload(raw: string, allowedOrigins: string[]) {
       .filter((origin): origin is string => Boolean(origin)),
   );
   if (!origins.has(url.origin) || url.search || url.hash) {
+    return { type: "rejected" as const };
+  }
+  const referenceSlip = url.pathname.match(/^\/e-booking\/r\/([^/]+)$/);
+  if (referenceSlip?.[1]) {
+    const reference = decodeURIComponent(referenceSlip[1]).toUpperCase();
+    if (isReference(reference)) return { type: "reference" as const, reference };
     return { type: "rejected" as const };
   }
   const match = url.pathname.match(/^\/(?:e-booking|demo-ticket|v)\/([^/]+)$/);

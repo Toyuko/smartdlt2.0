@@ -1,0 +1,64 @@
+import { Suspense } from "react";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { connection } from "next/server";
+import QRCode from "qrcode";
+import { ElectronicTicket, TicketMissing, TicketUnavailable } from "@/components/booking/electronic-ticket";
+import { SetupRequired } from "@/components/language";
+import { getStaffSession } from "@/lib/auth";
+import { buildReferenceSlipUrl, resolveTicketOrigin } from "@/lib/booking/codes";
+import { loadTicketByReference } from "@/lib/booking/ticket";
+import { SetupError } from "@/lib/http";
+
+export const instant = false;
+export const metadata: Metadata = {
+  title: "ใบนัดอิเล็กทรอนิกส์(E-Booking)",
+  robots: { index: false, follow: false },
+};
+
+export default function ReferenceSlipPage({ params }: { params: Promise<{ reference: string }> }) {
+  return (
+    <Suspense fallback={<p lang="th" className="px-4 py-8 text-sm text-muted">กำลังโหลดใบนัด…</p>}>
+      <ReferenceSlipLoader params={params} />
+    </Suspense>
+  );
+}
+
+async function ReferenceSlipLoader({ params }: { params: Promise<{ reference: string }> }) {
+  await connection();
+  const { reference } = await params;
+  const origin = resolveTicketOrigin(await headers());
+  const ticketUrl = origin ? buildReferenceSlipUrl(origin, reference.toUpperCase()) : "";
+  try {
+    const [result, session] = await Promise.all([
+      loadTicketByReference(reference),
+      getStaffSession().catch(() => ({ kind: "anonymous" as const })),
+    ]);
+    if (result.state === "unavailable") return <TicketUnavailable />;
+    if (result.state !== "ready") return <TicketMissing />;
+    let imageSrc = "";
+    if (ticketUrl) {
+      try {
+        imageSrc = await QRCode.toDataURL(ticketUrl, {
+          errorCorrectionLevel: "H",
+          margin: 2,
+          width: 320,
+          color: { dark: "#111111", light: "#ffffff" },
+        });
+      } catch {
+        imageSrc = "";
+      }
+    }
+    const staff = session.kind === "staff" ? { bookingId: result.booking.id, status: result.booking.status } : null;
+    return <ElectronicTicket booking={result.booking} outcome={result.outcome} ticketUrl={ticketUrl} imageSrc={imageSrc} staff={staff} />;
+  } catch (error) {
+    if (error instanceof SetupError) {
+      return (
+        <main className="mx-auto w-full max-w-3xl px-4 py-8">
+          <SetupRequired />
+        </main>
+      );
+    }
+    return <TicketUnavailable />;
+  }
+}

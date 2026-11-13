@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { connection } from "next/server";
 import { ConfirmationScreen } from "@/components/booking/confirmation";
 import { TicketMissing, TicketUnavailable } from "@/components/booking/electronic-ticket";
 import { SetupRequired } from "@/components/language";
+import { buildReferenceSlipUrl, resolveTicketOrigin } from "@/lib/booking/codes";
 import { loadTicketByReference } from "@/lib/booking/ticket";
 import { SetupError } from "@/lib/http";
 
@@ -28,7 +30,9 @@ async function ConfirmationLoader({ params }: { params: Promise<{ reference: str
     const result = await loadTicketByReference(reference);
     if (result.state === "unavailable") return <TicketUnavailable />;
     if (result.state !== "ready") return <TicketMissing />;
-    return <ConfirmationScreen booking={result.booking} outcome={result.outcome} />;
+    const origin = resolveTicketOrigin(await headers());
+    const ticketUrl = origin ? buildReferenceSlipUrl(origin, result.booking.reference) : "";
+    return <ConfirmationScreen booking={result.booking} outcome={result.outcome} initialTicketUrl={ticketUrl} />;
   } catch (error) {
     if (error instanceof SetupError) {
       return (
