@@ -78,6 +78,14 @@ export const officeSeed = [
     province_th: "กรุงเทพมหานคร",
     demo_label: "Demo location — not an official DLT office",
   },
+  {
+    slug: "krabi",
+    name: "Krabi Provincial Transport Office",
+    name_th: "สำนักงานขนส่งจังหวัดกระบี่",
+    province: "Krabi",
+    province_th: "กระบี่",
+    demo_label: "Demo location — not an official DLT office",
+  },
 ];
 
 const categoryChecklist = guidance([
