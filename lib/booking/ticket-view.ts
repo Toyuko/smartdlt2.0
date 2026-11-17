@@ -71,7 +71,9 @@ function splitDisplayName(name: string) {
 export function presentTicket(booking: PublicBooking, locale: "en" | "th") {
   const names = splitDisplayName(booking.applicantDisplayName);
   const applicant = applicantShort(booking.applicantCategory);
-  const categoryUpper = (locale === "th" ? booking.categoryLabelTh : booking.categoryLabel).toUpperCase();
+  const category = locale === "th" ? booking.categoryLabelTh : booking.categoryLabel;
+  const service = locale === "th" ? booking.serviceNameTh : booking.serviceName;
+  const categoryUpper = category.toUpperCase();
   return {
     date: formatBookingDate(booking.startsAt),
     slipDate: formatSlipDate(booking.startsAt, locale),
@@ -81,7 +83,7 @@ export function presentTicket(booking: PublicBooking, locale: "en" | "th") {
     ticketTime: formatAppointmentRange(booking.startsAt, booking.endsAt),
     applicantShort: applicant,
     categoryUpper,
-    bookingType: applicant ? `${applicant}: ${booking.categoryLabel.toUpperCase()}` : booking.categoryLabel.toUpperCase(),
+    bookingType: service ? `${category}: ${service}` : category,
     firstName: names.first,
     lastName: names.last,
     category: locale === "th" ? booking.categoryLabelTh : booking.categoryLabel,

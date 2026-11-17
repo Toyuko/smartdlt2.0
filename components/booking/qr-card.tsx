@@ -78,31 +78,29 @@ export function QrCard({
 
   if (layout === "slip") {
     return (
-      <div className="mt-3 flex flex-col items-center">
-        <figure data-testid="qr-print" data-qr-payload={verificationUrl} className="qr-print flex w-full flex-col items-center">
-          <div className="relative w-full">
-            {src ? (
-              <img src={src} alt={reference} width={192} height={192} className="mx-auto h-auto w-48 max-w-full" />
-            ) : (
-              <QrPlaceholder reference={reference} label={t.book.submitting} compact />
-            )}
-            <div className="no-print">
-              <button
-                type="button"
-                aria-label={t.actions.saveQr}
-                onClick={() => void save()}
-                className="absolute top-1/2 right-0 grid h-10 w-10 -translate-x-8 -translate-y-1/2 place-items-center rounded-full bg-[#f3f3f5] text-[#8a8a94] shadow-sm"
-              >
-                <DownloadIcon className="h-5 w-5" />
-              </button>
-              <button type="button" className="sr-only" onClick={() => window.print()}>
-                {t.actions.print}
-              </button>
-            </div>
+      <figure data-testid="qr-print" data-qr-payload={verificationUrl} className="qr-print mt-2 flex w-full flex-col items-center">
+        <div className="relative w-full">
+          {src ? (
+            <img src={src} alt={reference} width={208} height={208} className="mx-auto h-auto w-52 max-w-[70%]" />
+          ) : (
+            <QrPlaceholder reference={reference} label={t.book.submitting} compact />
+          )}
+          <div className="no-print absolute top-1/2 right-0 -translate-y-1/2">
+            <button
+              type="button"
+              aria-label={t.actions.saveQr}
+              onClick={() => void save()}
+              className="grid h-11 w-11 place-items-center rounded-full bg-[#f2f2f4] text-[#8d8d96] shadow-[0_2px_8px_rgba(20,20,40,0.08)]"
+            >
+              <DownloadIcon className="h-5 w-5" />
+            </button>
+            <button type="button" className="sr-only" onClick={() => window.print()}>
+              {t.actions.print}
+            </button>
           </div>
-          <figcaption className="mt-2 break-all text-center text-sm font-semibold tracking-wide text-[#2a2a2a]">{reference}</figcaption>
-        </figure>
-      </div>
+        </div>
+        <figcaption className="mt-2 break-all text-center text-[15px] font-semibold tracking-wide text-[#1c1c1c]">{reference}</figcaption>
+      </figure>
     );
   }
 
@@ -139,7 +137,7 @@ export function QrCard({
 function QrPlaceholder({ reference, label, compact = false }: { reference: string; label: string; compact?: boolean }) {
   return (
     <div
-      className={compact ? "grid h-56 w-56 max-w-full place-items-center rounded-2xl bg-mist text-sm text-muted" : "grid h-64 w-64 max-w-full place-items-center rounded-2xl bg-mist text-sm text-muted"}
+      className={compact ? "mx-auto grid h-52 w-52 max-w-[70%] place-items-center rounded-2xl bg-mist text-sm text-muted" : "grid h-64 w-64 max-w-full place-items-center rounded-2xl bg-mist text-sm text-muted"}
       role="img"
       aria-label={reference}
     >
@@ -150,10 +148,11 @@ function QrPlaceholder({ reference, label, compact = false }: { reference: strin
 
 function DownloadIcon({ className }: { className?: string }) {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className={`${className ?? ""} fill-none stroke-current`} strokeWidth="2">
-      <path d="M12 4v10" strokeLinecap="round" />
-      <path d="M8 10l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M5 19h14" strokeLinecap="round" />
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={`${className ?? ""} fill-none stroke-current`} strokeWidth="1.8">
+      <path d="M12 4v9" strokeLinecap="round" />
+      <path d="m8.2 10.2 3.8 3.8 3.8-3.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6 17.5h12" strokeLinecap="round" />
+      <path d="M7.5 17.5V19a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-1.5" strokeLinecap="round" />
     </svg>
   );
 }

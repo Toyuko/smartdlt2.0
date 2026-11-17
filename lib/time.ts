@@ -93,14 +93,9 @@ export function formatBookingDate(iso: string) {
 export function formatSlipDate(iso: string, locale: "en" | "th" = "en") {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  const formatted = new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-GB", {
-    timeZone: BANGKOK,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
-  return formatted.replace(/,/g, "");
+  const parts = bangkokDateParts(date);
+  const year = locale === "th" ? parts.year + 543 : parts.year;
+  return `${String(parts.day).padStart(2, "0")}/${String(parts.month).padStart(2, "0")}/${year}`;
 }
 
 export function formatSlotRange(startsAt: string, endsAt: string) {
@@ -112,7 +107,8 @@ export function formatSlotRange(startsAt: string, endsAt: string) {
 }
 
 export function formatSlipRound(startsAt: string, endsAt: string) {
-  return formatSlotRange(startsAt, endsAt).replaceAll("–", " - ");
+  if (Number.isNaN(new Date(startsAt).getTime()) || Number.isNaN(new Date(endsAt).getTime())) return "—";
+  return formatTime(startsAt);
 }
 
 export function formatAppointmentDate(iso: string) {

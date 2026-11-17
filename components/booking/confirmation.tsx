@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { GuidancePanel } from "@/components/booking/document-guidance";
 import { QrCard } from "@/components/booking/qr-card";
 import { useI18n } from "@/components/language";
@@ -32,46 +31,52 @@ export function ConfirmationScreen({
   }, [booking.reference, initialTicketUrl]);
 
   return (
-    <div className="confirmation-page min-h-dvh bg-white px-4 pb-24 pt-3 lg:pb-10">
+    <div className="confirmation-page min-h-dvh bg-[linear-gradient(180deg,#f3e6fb_0%,#f7f1fb_24%,#f6f6f8_58%,#f5f5f7_100%)] px-4 pb-16 pt-5 lg:pb-12">
       <div data-testid="confirmation-layout" className="mx-auto w-full max-w-md overflow-x-hidden lg:max-w-xl">
         <p className="print-disclaimer slip-legal" data-testid="print-disclaimer">
           {DEMO_NOTICE}
         </p>
-        <div className="relative flex h-10 items-center">
-          <Link href="/" aria-label={t.confirm.back} className="grid h-11 w-11 place-items-center text-[#2c2144]">
-            <Chevron />
-          </Link>
-        </div>
 
-        <section className="print-card overflow-hidden rounded-2xl bg-white shadow-[0_10px_28px_rgba(40,20,80,0.08)]">
-          <h1 className="bg-[#6d28d9] px-5 py-4 text-[22px] font-bold leading-tight text-white">{t.confirm.pageTitle}</h1>
-          <div className="px-5 pb-6 pt-5">
-            <div className="grid grid-cols-2 gap-x-6 border-b border-[#ececf2] pb-4">
-              <Info label={t.confirm.slipName} value={view.name} tone="ink" />
-              <Info label={t.confirm.idNo} value={view.identityNumber || "—"} testId="identity-number" />
-            </div>
-            <div className="grid grid-cols-2 gap-x-6 pt-4">
-              <Info label={t.confirm.bookingDate} value={view.slipDate} />
-              <Info label={t.confirm.round} value={view.slipRound} />
-            </div>
-            <div className="mt-6">
-              <Info label={t.confirm.type} value={view.bookingType} />
-            </div>
-            <div className="mt-6">
-              <Info label={t.confirm.office} value={view.office} testId="office-name" />
-            </div>
+        <section className="print-card rounded-[22px] bg-white px-5 pb-5 pt-4 shadow-[0_10px_28px_rgba(80,40,140,0.08)]">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-2.5 gap-y-1.5">
+            <p className="text-[12px] leading-4 text-[#9a9aa4]">{t.confirm.bookingDate}</p>
+            <h1 className="px-1 text-center text-[12px] font-normal leading-4 text-[#9a9aa4]">{t.confirm.pageTitle}</h1>
+            <p className="text-right text-[12px] leading-4 text-[#9a9aa4]">{t.confirm.round}</p>
+            <p className="text-[15px] font-bold tabular-nums leading-5 text-[#171717]">{view.slipDate}</p>
+            <SlotArrow />
+            <p className="text-right text-[15px] font-bold tabular-nums leading-5 text-[#171717]">{view.slipRound}</p>
+          </div>
+          <p className="mt-4 text-[14px] font-semibold leading-6 text-[#6d28d9]">{view.bookingType}</p>
+        </section>
+
+        <section className="print-card mt-4 overflow-hidden rounded-[22px] bg-white shadow-[0_10px_28px_rgba(80,40,140,0.06)]">
+          <div className="flex items-start justify-between gap-3 px-5 pb-4 pt-5">
+            <Info label={t.confirm.slipName} value={view.name} />
+            <Info label={t.confirm.idNo} value={view.identityNumber || "—"} tone="brand" align="right" testId="identity-number" />
+          </div>
+          <div className="bg-[#f2f5fa] px-5 py-4 text-center">
+            <p className="text-[12px] leading-4 text-[#9a9aa4]">{t.confirm.office}</p>
+            <p data-testid="office-name" className="mt-1.5 break-words text-[15px] font-bold leading-6 text-[#6d28d9]">
+              {view.office}
+            </p>
+          </div>
+          <div className="px-5 pb-5 pt-4 text-center">
+            {view.vehicle ? (
+              <>
+                <p className="text-[12px] leading-4 text-[#9a9aa4]">{t.confirm.slipVehicle}</p>
+                <p className="mt-1.5 text-[15px] font-bold leading-6 text-[#6d28d9]">{view.vehicle}</p>
+              </>
+            ) : null}
+            <p className={view.vehicle ? "mt-5 text-[12px] leading-4 text-[#9a9aa4]" : "text-[12px] leading-4 text-[#9a9aa4]"}>
+              {t.confirm.queueRecord}
+            </p>
+            {ticketUrl ? <QrCard verificationUrl={ticketUrl} reference={booking.reference} layout="slip" /> : null}
           </div>
         </section>
 
-        {ticketUrl ? (
-          <section className="qr-print mt-3 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(90,50,150,0.06)]">
-            <QrCard verificationUrl={ticketUrl} reference={booking.reference} layout="slip" />
-          </section>
-        ) : null}
-
         <button
           type="button"
-          className="no-print mt-4 w-full rounded-xl bg-[#7b3aed] px-4 py-3.5 text-base font-semibold text-white"
+          className="no-print mx-auto mt-5 block w-fit max-w-full rounded-full bg-[#7c3aed] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_18px_rgba(124,58,237,0.28)]"
           aria-expanded={documentsOpen}
           aria-controls="required-documents"
           onClick={() => setDocumentsOpen((open) => !open)}
@@ -80,7 +85,7 @@ export function ConfirmationScreen({
         </button>
         <section
           id="required-documents"
-          className={documentsOpen ? "mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line" : "print-documents mt-4 hidden rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line"}
+          className={documentsOpen ? "mt-4 rounded-[22px] bg-white p-4 shadow-sm" : "print-documents mt-4 hidden rounded-[22px] bg-white p-4 shadow-sm"}
         >
           <h2 className="text-lg font-bold">{t.confirm.guidance}</h2>
           <p className="mt-2 text-sm leading-6 text-muted">{t.confirm.documentsIntro}</p>
@@ -89,98 +94,44 @@ export function ConfirmationScreen({
           </div>
         </section>
       </div>
-      <SlipNav reference={booking.reference} />
     </div>
-  );
-}
-
-function SlipNav({ reference }: { reference: string }) {
-  const { t } = useI18n();
-  const items = [
-    { href: "/", label: t.confirm.navHome, icon: "home" as const, current: false },
-    { href: "/lookup", label: t.confirm.navProfile, icon: "profile" as const, current: false },
-    { href: `/booking-confirmation/${reference}`, label: t.confirm.navHistory, icon: "history" as const, current: true },
-    { href: "/about-demo", label: t.confirm.navSetting, icon: "setting" as const, current: false },
-  ];
-  return (
-    <nav className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-[#ececf2] bg-white pb-[max(0.35rem,env(safe-area-inset-bottom))] lg:hidden" aria-label="Primary">
-      <p className="pointer-events-none absolute right-4 top-1 text-[10px] text-[#b0b0b8]">{t.confirm.versionLabel}</p>
-      <div className="grid grid-cols-4 px-1 pt-3">
-        {items.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            aria-current={item.current ? "page" : undefined}
-            className={`relative flex flex-col items-center gap-1 pb-1 text-[11px] font-medium ${item.current ? "text-[#6d28d9]" : "text-[#c4b0ea]"}`}
-          >
-            {item.current ? <span className="absolute -top-3 h-0.5 w-8 rounded-full bg-[#7b3aed]" /> : null}
-            <NavIcon name={item.icon} />
-            {item.label}
-          </Link>
-        ))}
-      </div>
-    </nav>
   );
 }
 
 function Info({
   label,
   value,
-  tone = "brand",
+  tone = "ink",
+  align = "left",
   testId,
 }: {
   label: string;
   value: string;
   tone?: "ink" | "brand";
+  align?: "left" | "right";
   testId?: string;
 }) {
   return (
-    <div className="min-w-0 text-left">
-      <p className="text-sm text-[#a09aaa]">{label}</p>
-      <p data-testid={testId} className={`mt-1.5 break-words text-[15px] font-bold leading-6 ${tone === "ink" ? "text-[#1a1a1a]" : "text-[#3d188c]"}`}>
+    <div className={`min-w-0 ${align === "right" ? "text-right" : "text-left"}`}>
+      <p className="text-[12px] leading-4 text-[#9a9aa4]">{label}</p>
+      <p
+        data-testid={testId}
+        className={`mt-1.5 break-words text-[15px] font-bold leading-6 ${tone === "ink" ? "text-[#171717]" : "text-[#6d28d9]"}`}
+      >
         {value}
       </p>
     </div>
   );
 }
 
-function Chevron() {
+function SlotArrow() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6 fill-none stroke-current" strokeWidth="2">
-      <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <div className="flex h-5 items-center text-[#c8c8d0]" aria-hidden="true">
+      <span className="h-px flex-1 bg-current" />
+      <svg viewBox="0 0 10 10" className="-ml-px h-2.5 w-2.5 fill-none stroke-current" strokeWidth="1.4">
+        <path d="M2 1.2 7.2 5 2 8.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
   );
 }
 
-function NavIcon({ name }: { name: "home" | "profile" | "history" | "setting" }) {
-  const common = "h-6 w-6 fill-none stroke-current";
-  if (name === "home") {
-    return (
-      <svg aria-hidden="true" viewBox="0 0 24 24" className={common} strokeWidth="1.8">
-        <path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-8.5Z" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-  if (name === "profile") {
-    return (
-      <svg aria-hidden="true" viewBox="0 0 24 24" className={common} strokeWidth="1.8">
-        <circle cx="12" cy="8" r="3.2" />
-        <path d="M5 19.2c1.4-3 3.8-4.4 7-4.4s5.6 1.4 7 4.4" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  if (name === "history") {
-    return (
-      <svg aria-hidden="true" viewBox="0 0 24 24" className={common} strokeWidth="1.8">
-        <rect x="4" y="5" width="16" height="15" rx="2" />
-        <path d="M8 3.5v3M16 3.5v3M4 9.5h16" strokeLinecap="round" />
-      </svg>
-    );
-  }
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className={common} strokeWidth="1.8">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 3.5v2.2M12 18.3V20.5M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M18 6l-1.6 1.6M7.6 16.4 6 18" strokeLinecap="round" />
-    </svg>
-  );
-}
