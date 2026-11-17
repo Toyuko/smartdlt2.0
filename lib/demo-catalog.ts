@@ -86,6 +86,14 @@ export const officeSeed = [
     province_th: "กระบี่",
     demo_label: "Demo location — not an official DLT office",
   },
+  {
+    slug: "surat-thani-samui",
+    name: "Surat Thani Provincial Transport Office, Koh Samui Branch",
+    name_th: "สำนักงานขนส่งจังหวัดสุราษฎร์ธานี สาขาเกาะสมุย",
+    province: "Surat Thani",
+    province_th: "สุราษฎร์ธานี",
+    demo_label: "Demo location — not an official DLT office",
+  },
 ];
 
 const categoryChecklist = guidance([
