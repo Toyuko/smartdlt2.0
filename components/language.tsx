@@ -83,7 +83,7 @@ function RouteChrome() {
   const pathname = usePathname() ?? "/";
   if (isBookPath(pathname) || isTicketPath(pathname)) return null;
   return (
-    <div className={isImmersivePath(pathname) ? "max-lg:hidden" : undefined}>
+    <div className={isImmersivePath(pathname) ? "hidden" : undefined}>
       <DemoBanner />
       <SiteHeader />
     </div>
@@ -95,7 +95,7 @@ function SiteFooter() {
   const pathname = usePathname() ?? "/";
   if (isBookPath(pathname)) return null;
   return (
-    <footer className={`no-print border-t border-line px-4 py-6 text-center text-sm text-muted ${isImmersivePath(pathname) ? "max-lg:hidden" : ""}`}>
+    <footer className={`no-print border-t border-line px-4 py-6 text-center text-sm text-muted ${isImmersivePath(pathname) ? "hidden" : ""}`}>
       {t.footer}
     </footer>
   );

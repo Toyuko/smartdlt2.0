@@ -31,8 +31,8 @@ export function ConfirmationScreen({
   }, [booking.reference, initialTicketUrl]);
 
   return (
-    <div className="confirmation-page min-h-dvh bg-[linear-gradient(180deg,#f3e6fb_0%,#f7f1fb_24%,#f6f6f8_58%,#f5f5f7_100%)] px-4 pb-16 pt-5 lg:pb-12">
-      <div data-testid="confirmation-layout" className="mx-auto w-full max-w-md overflow-x-hidden lg:max-w-xl">
+    <div className="confirmation-page min-h-dvh bg-[linear-gradient(180deg,#f3e6fb_0%,#f7f1fb_24%,#f6f6f8_58%,#f5f5f7_100%)] px-4 pb-16 pt-5">
+      <div data-testid="confirmation-layout" className="mx-auto w-full max-w-md overflow-x-hidden">
         <p className="print-disclaimer slip-legal" data-testid="print-disclaimer">
           {DEMO_NOTICE}
         </p>

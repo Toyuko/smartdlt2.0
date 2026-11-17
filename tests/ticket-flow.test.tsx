@@ -90,7 +90,7 @@ describe("booking confirmation and electronic ticket", () => {
     expect(screen.queryByText(/DEMO QR CODE/)).not.toBeInTheDocument();
     expect(screen.getByTestId("print-disclaimer")).toHaveTextContent(DEMO_NOTICE);
     expect(screen.getByTestId("confirmation-layout").className).toContain("max-w-md");
-    expect(screen.getByTestId("confirmation-layout").className).toContain("lg:max-w-xl");
+    expect(screen.getByTestId("confirmation-layout").className).not.toContain("lg:max-w-xl");
     expect(screen.getByTestId("confirmation-layout").className).toContain("overflow-x-hidden");
     await userEvent.click(screen.getByRole("button", { name: "Required Documents to prepare" }));
     expect(screen.getByText("Sample checklist — foreign applicant")).toBeInTheDocument();
