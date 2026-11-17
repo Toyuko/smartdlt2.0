@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildReferenceSlipUrl, buildVerificationUrl, isReference, parseScanPayload, resolveTicketOrigin } from "@/lib/booking/codes";
+import { buildConfirmationUrl, buildReferenceSlipUrl, buildVerificationUrl, isReference, parseScanPayload, resolveTicketOrigin } from "@/lib/booking/codes";
 import { createDemoBooking, type BookingWriter } from "@/lib/booking/create-booking";
 import { decideVerificationOutcome } from "@/lib/booking/outcomes";
 import { toPublicBooking, type PublicBooking } from "@/lib/booking/public-view";
@@ -190,6 +190,10 @@ describe("demo booking rules", () => {
       reference: "W20261029113827AQD",
     });
     expect(parseScanPayload(buildReferenceSlipUrl("https://demo.example", "W20261029113827AQD"), ["https://demo.example"])).toEqual({
+      type: "reference",
+      reference: "W20261029113827AQD",
+    });
+    expect(parseScanPayload(buildConfirmationUrl("https://demo.example", "W20261029113827AQD"), ["https://demo.example"])).toEqual({
       type: "reference",
       reference: "W20261029113827AQD",
     });

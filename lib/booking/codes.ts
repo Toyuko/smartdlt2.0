@@ -28,6 +28,14 @@ export function buildReferenceSlipUrl(origin: string, reference: string) {
   return url.toString();
 }
 
+export function buildConfirmationUrl(origin: string, reference: string) {
+  const base = origin.endsWith("/") ? origin : `${origin}/`;
+  const url = new URL(`booking-confirmation/${encodeURIComponent(reference)}`, base);
+  url.search = "";
+  url.hash = "";
+  return url.toString();
+}
+
 export function resolveTicketOrigin(headerList: { get(name: string): string | null }) {
   const configured = process.env.APP_BASE_URL?.trim();
   if (configured) return configured.replace(/\/$/, "");
@@ -63,7 +71,7 @@ export function parseScanPayload(raw: string, allowedOrigins: string[]) {
   if (!origins.has(url.origin) || url.search || url.hash) {
     return { type: "rejected" as const };
   }
-  const referenceSlip = url.pathname.match(/^\/e-booking\/r\/([^/]+)$/);
+  const referenceSlip = url.pathname.match(/^\/(?:e-booking\/r|booking-confirmation)\/([^/]+)$/);
   if (referenceSlip?.[1]) {
     const reference = decodeURIComponent(referenceSlip[1]).toUpperCase();
     if (isReference(reference)) return { type: "reference" as const, reference };
