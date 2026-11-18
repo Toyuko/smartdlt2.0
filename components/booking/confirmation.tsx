@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { GuidancePanel } from "@/components/booking/document-guidance";
 import { QrCard } from "@/components/booking/qr-card";
-import { useI18n } from "@/components/language";
 import type { VerificationOutcome } from "@/lib/booking/outcomes";
 import { presentTicket } from "@/lib/booking/ticket-view";
 import { DEMO_NOTICE } from "@/lib/demo-notice";
+import { th } from "@/lib/i18n/dictionary";
 import type { PublicBooking } from "@/lib/booking/public-view";
 
 export function ConfirmationScreen({
@@ -17,10 +17,10 @@ export function ConfirmationScreen({
   outcome: VerificationOutcome;
   initialTicketUrl?: string;
 }) {
-  const { locale, t } = useI18n();
+  const t = th;
   const [ticketUrl, setTicketUrl] = useState(initialTicketUrl);
   const [documentsOpen, setDocumentsOpen] = useState(false);
-  const view = presentTicket(booking, locale);
+  const view = presentTicket(booking, "th");
 
   useEffect(() => {
     if (initialTicketUrl) return;
@@ -31,7 +31,7 @@ export function ConfirmationScreen({
   }, [booking.reference, initialTicketUrl]);
 
   return (
-    <div className="confirmation-page min-h-dvh bg-[linear-gradient(180deg,#f3e6fb_0%,#f7f1fb_24%,#f6f6f8_58%,#f5f5f7_100%)] px-4 pb-16 pt-5">
+    <div lang="th" className="confirmation-page min-h-dvh bg-[linear-gradient(180deg,#f3e6fb_0%,#f7f1fb_24%,#f6f6f8_58%,#f5f5f7_100%)] px-4 pb-16 pt-5">
       <div data-testid="confirmation-layout" className="mx-auto w-full max-w-md overflow-x-hidden">
         <p className="print-disclaimer slip-legal" data-testid="print-disclaimer">
           {DEMO_NOTICE}
